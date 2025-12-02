@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background circle -->
+    <circle cx="100" cy="100" r="100" fill="#E2E8F0"/>
+    
+    <!-- Head -->
+    <circle cx="100" cy="85" r="35" fill="#94A3B8"/>
+    
+    <!-- Body -->
+    <path d="M100 125 C 60 125, 40 160, 40 200 L 160 200 C 160 160, 140 125, 100 125" fill="#94A3B8"/>
+    
+    <!-- Name placeholder -->
+    <text x="100" y="180" font-family="Arial, sans-serif" font-size="14" fill="#475569" text-anchor="middle">Guide Profile</text>
+</svg> 

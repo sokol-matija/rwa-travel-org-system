@@ -1,0 +1,630 @@
+@page
+@model WebApp.Pages.Trips.IndexModel
+@{
+    ViewData["Title"] = "Available Trips";
+}
+
+<style>
+    /* Dark theme dropdown styling */
+    .form-select {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: #ecf0f1 !important;
+    }
+    
+    .form-select:focus {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        border-color: #3498db !important;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+        color: #ecf0f1 !important;
+    }
+    
+    /* Dropdown options styling */
+    .form-select option {
+        background-color: #2c3e50 !important;
+        color: #ecf0f1 !important;
+        padding: 8px 12px !important;
+    }
+    
+    .form-select option:hover,
+    .form-select option:focus,
+    .form-select option:checked {
+        background-color: #3498db !important;
+        color: #ffffff !important;
+    }
+    
+    /* Additional browser compatibility */
+    select.form-select {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ecf0f1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+        background-position: right 0.75rem center !important;
+        background-repeat: no-repeat !important;
+        background-size: 16px 12px !important;
+        padding-right: 2.5rem !important;
+    }
+    
+
+    
+    /* DISABLE ALL HOVER EFFECTS ON TRIPS PAGE */
+    .dark-theme-card:hover,
+    .dark-theme-card:hover::before,
+    .dark-theme-card:hover::after,
+    .card:hover,
+    .card:hover::before,
+    .card:hover::after,
+    .clickable-card:hover {
+        border-color: inherit !important;
+        box-shadow: inherit !important;
+        transform: none !important;
+        scale: none !important;
+    }
+    
+    /* Disable any Bootstrap card hover effects */
+    .card.dark-theme-card:hover,
+    .dark-theme-card.card:hover {
+        box-shadow: inherit !important;
+        transform: none !important;
+    }
+    
+    /* Remove all transitions to make cards completely static - EXCEPT modals */
+    .dark-theme-card:not(.modal-content),
+    .dark-theme-card:not(.modal-content)::before,
+    .dark-theme-card:not(.modal-content)::after,
+    .card:not(.modal-content),
+    .card:not(.modal-content)::before,
+    .card:not(.modal-content)::after,
+    .clickable-card {
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    /* ALLOW admin-plus-circle animation to work */
+    .admin-plus-circle,
+    .admin-plus-circle i,
+    .admin-plus-circle::after {
+        transition: all 0.3s ease !important;
+        animation: initial !important;
+    }
+    
+    /* Enable the rotation animation on hover */
+    .admin-plus-circle:hover i {
+        transform: rotate(90deg) !important;
+    }
+    
+    /* Enable the ripple effect on click */
+    .admin-plus-circle:active::after {
+        animation: adminRipple 0.6s ease-out !important;
+    }
+    
+    /* Trip Cards Responsive Layout Improvements */
+    .trip-card-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .trip-card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .trip-card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .trip-card-info {
+        flex: 1;
+    }
+    
+    .trip-card-footer {
+        margin-top: auto;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Responsive improvements for trip cards only are handled in travel-theme.css 
+       Uses .trips-page class for specificity
+       New breakpoints: 1 column (up to 770px) → 2 columns (770px-1200px) → 3 columns (1200px+)
+       Admin controls and filter cards remain unaffected */
+    
+    /* Ensure consistent card heights */
+    .clickable-card.h-100 {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .clickable-card .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .clickable-card .card-footer {
+        margin-top: auto;
+    }
+</style>
+
+<div class="container mt-4 trips-page">
+    <div class="text-center mb-5">
+        <h1 class="dark-theme-section-title">
+            <i class="fas fa-suitcase-rolling me-3"></i>@ViewData["Title"]
+        </h1>
+        <p class="dark-theme-section-subtitle">Discover amazing adventures and book your perfect trip</p>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+    {
+        <div class="alert alert-success alert-dismissible fade show dark-theme-alert" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger dark-theme-alert" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+        </div>
+    }
+
+    <!-- Admin Controls Section -->
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="dark-theme-card mb-4">
+            <div class="card-header border-0 pb-0" style="background: rgba(231, 76, 60, 0.1);">
+                <h5 class="mb-0 fw-bold" style="color: #e74c3c;">
+                    <i class="fas fa-tools me-2"></i>Admin Controls
+                </h5>
+            </div>
+            <div class="card-body pt-3">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-warning w-100" onclick="populateTripImages()">
+                            <i class="fas fa-images me-2"></i>Populate Trip Images
+                        </button>
+                        <small style="color: #bdc3c7;" class="d-block mt-1">Automatically fetch images from Unsplash for trips without images</small>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="button" class="btn btn-info w-100" onclick="refreshAllImages()">
+                            <i class="fas fa-sync-alt me-2"></i>Refresh All Images
+                        </button>
+                        <small style="color: #bdc3c7;" class="d-block mt-1">Force refresh images for all trips</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Filter Section -->
+    <div class="dark-theme-card mb-4">
+        <div class="card-header border-0 pb-0" style="background: rgba(52, 152, 219, 0.1);">
+            <h5 class="mb-0 fw-bold" style="color: #3498db;">
+                <i class="fas fa-filter me-2"></i>Filter Trips
+            </h5>
+        </div>
+        <div class="card-body pt-3">
+            <form method="get" class="row g-3 align-items-end dark-theme-form" id="tripFilterForm">
+                <div class="col-md-8">
+                    <label asp-for="DestinationId" class="form-label fw-medium" style="color: #ecf0f1;">
+                        <i class="fas fa-map-marker-alt me-1"></i>Destination
+                    </label>
+                    <select asp-for="DestinationId" asp-items="Model.Destinations" class="form-select" id="DestinationId">
+                        <option value="">-- All Destinations --</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill" id="filterSubmitBtn">
+                            <i class="fas fa-search me-2"></i>Apply Filter
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="clearFilter()">
+                            <i class="fas fa-times me-1"></i>Clear
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Trip Listings -->
+    @if (Model.Trips != null && Model.Trips.Any())
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="col">
+                    <a asp-page="./Create" class="admin-card-link">
+                        <div class="admin-card h-100">
+                            <div class="card-body">
+                                <button type="button" class="admin-plus-circle">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <h5 class="card-title">Add New Trip</h5>
+                                <p class="card-text">Create a new trip for travelers to explore amazing destinations</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+            
+            @foreach (var trip in Model.Trips)
+            {
+                <div class="col">
+                    <div class="dark-theme-card h-100 clickable-card" onclick="navigateToTripDetails(@trip.Id)" style="cursor: pointer;">
+                        <div class="position-relative">
+                            @if (!string.IsNullOrEmpty(trip.ImageUrl))
+                            {
+                                <img src="@trip.ImageUrl" class="card-img-top" alt="@trip.Title" style="height: 250px; object-fit: cover; border-radius: 20px 20px 0 0;">
+                            }
+                            else
+                            {
+                                <div class="card-img-top d-flex justify-content-center align-items-center" style="height: 250px; background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(46, 204, 113, 0.2)); border-radius: 20px 20px 0 0;">
+                                    <div class="text-center">
+                                        <i class="fas fa-plane-departure fa-4x mb-2" style="color: #3498db; opacity: 0.7;"></i>
+                                        <p class="mb-0" style="color: #bdc3c7;">No image available</p>
+                                    </div>
+                                </div>
+                            }
+                            
+                            <!-- Price badge -->
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge fs-6 px-3 py-2" style="background: rgba(0, 0, 0, 0.8); color: #2ecc71; backdrop-filter: blur(10px); border: 1px solid rgba(46, 204, 113, 0.3); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); font-weight: 600;">
+                                    <i class="fas fa-tag me-1"></i>@trip.FormattedPrice
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <div class="trip-card-info flex-grow-1">
+                                <h5 class="card-title fw-bold" style="color: #3498db;">@trip.Title</h5>
+                                <h6 class="card-subtitle mb-3" style="color: #2ecc71;">
+                                    <i class="fas fa-map-marker-alt me-1"></i>@trip.DestinationName
+                                </h6>
+                                @if (!string.IsNullOrEmpty(trip.Description))
+                                {
+                                    <p class="card-text mb-3" style="color: #bdc3c7; line-height: 1.5;">
+                                        @(trip.Description?.Length > 120 ? trip.Description.Substring(0, 120) + "..." : trip.Description)
+                                    </p>
+                                }
+                            </div>
+                            
+                            <!-- Trip Info Badges - positioned at bottom of card body -->
+                            <div class="row g-2 mt-auto">
+                                <div class="col-12">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge dark-theme-badge badge-warning">
+                                            <i class="fas fa-calendar-alt me-1"></i>@trip.StartDate.ToString("MMM d") - @trip.EndDate.ToString("MMM d, yyyy")
+                                        </span>
+                                        <span class="badge dark-theme-badge badge-info">
+                                            <i class="fas fa-clock me-1"></i>@trip.DurationInDays days
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    @if (trip.AvailableSlots > 0)
+                                    {
+                                        <span class="badge dark-theme-badge badge-success">
+                                            <i class="fas fa-users me-1"></i>@trip.AvailableSlots spots left
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge dark-theme-badge badge-danger">
+                                            <i class="fas fa-exclamation-circle me-1"></i>Fully booked
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer" style="background: rgba(255, 255, 255, 0.02); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a asp-page="./Details" asp-route-id="@trip.Id" class="btn btn-sm btn-primary" onclick="event.stopPropagation();">
+                                    <i class="fas fa-info-circle me-1"></i> Details
+                                </a>
+                                @if (User.Identity?.IsAuthenticated == true && trip.AvailableSlots > 0)
+                                {
+                                    <a asp-page="./Book" asp-route-id="@trip.Id" class="btn btn-sm btn-success" onclick="event.stopPropagation();">
+                                        <i class="fas fa-ticket-alt me-1"></i> Book
+                                    </a>
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <div class="ms-auto d-flex gap-1">
+                                        <a asp-page="./Edit" asp-route-id="@trip.Id" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); confirmDelete(@trip.Id, '@trip.Title');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <!-- Pagination Controls -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Trip list pagination">
+                    <ul class="pagination dark-theme-pagination">
+                        <!-- Previous button -->
+                        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                            @if (Model.HasPreviousPage)
+                            {
+                                <a class="page-link" asp-page="./Index" asp-route-page="@(Model.Page - 1)" asp-route-destinationId="@Model.DestinationId">
+                                    <i class="fas fa-chevron-left me-1"></i> Previous
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+                                    <i class="fas fa-chevron-left me-1"></i> Previous
+                                </span>
+                            }
+                        </li>
+
+                        <!-- Page numbers -->
+                        @{
+                            var startPage = Math.Max(1, Model.Page - 2);
+                            var endPage = Math.Min(Model.TotalPages, Model.Page + 2);
+                        }
+
+                        @if (startPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-page="./Index" asp-route-page="1" asp-route-destinationId="@Model.DestinationId">1</a>
+                            </li>
+                            @if (startPage > 2)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                        }
+
+                        @for (var i = startPage; i <= endPage; i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                @if (i == Model.Page)
+                                {
+                                    <span class="page-link">@i</span>
+                                }
+                                else
+                                {
+                                    <a class="page-link" asp-page="./Index" asp-route-page="@i" asp-route-destinationId="@Model.DestinationId">@i</a>
+                                }
+                            </li>
+                        }
+
+                        @if (endPage < Model.TotalPages)
+                        {
+                            @if (endPage < Model.TotalPages - 1)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            }
+                            <li class="page-item">
+                                <a class="page-link" asp-page="./Index" asp-route-page="@Model.TotalPages" asp-route-destinationId="@Model.DestinationId">@Model.TotalPages</a>
+                            </li>
+                        }
+
+                        <!-- Next button -->
+                        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                            @if (Model.HasNextPage)
+                            {
+                                <a class="page-link" asp-page="./Index" asp-route-page="@(Model.Page + 1)" asp-route-destinationId="@Model.DestinationId">
+                                    Next <i class="fas fa-chevron-right ms-1"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-link">
+                                    Next <i class="fas fa-chevron-right ms-1"></i>
+                                </span>
+                            }
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="dark-theme-card p-5">
+                <div class="empty-state">
+                    <i class="fas fa-suitcase-rolling fa-4x mb-4" style="color: #3498db; opacity: 0.7;"></i>
+                    <h3 class="mb-3" style="color: #ecf0f1;">No Trips Available</h3>
+                    <p class="mb-4" style="color: #bdc3c7; font-size: 1.1rem;">
+                        @if (Model.DestinationId.HasValue)
+                        {
+                            <span>No trips found for the selected destination. Try browsing all destinations or check back soon!</span>
+                        }
+                        else
+                        {
+                            <span>We're working on adding amazing trips for you to book. Check back soon!</span>
+                        }
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        @if (Model.DestinationId.HasValue)
+                        {
+                            <a href="@Url.Page("./Index")" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-globe me-2"></i>View All Trips
+                            </a>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-page="./Create" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>Add First Trip
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (User.IsInRole("Admin"))
+{
+    <div id="deleteModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999;">
+        <div id="deleteModalDialog" style="position: absolute; background: #2c3e50; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); width: 450px; max-width: 90vw; max-height: 90vh; border: 2px solid rgba(52, 152, 219, 0.4);">
+            <div style="padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                <h5 style="margin: 0; color: #ecf0f1; font-weight: bold;">
+                    <i class="fas fa-exclamation-triangle me-2" style="color: #e74c3c;"></i>
+                        Confirm Delete
+                    </h5>
+                <button onclick="closeDeleteModal()" style="float: right; margin-top: -25px; background: none; border: none; color: #bdc3c7; font-size: 20px; cursor: pointer;">&times;</button>
+                </div>
+            <div style="padding: 25px; text-align: center;">
+                <i class="fas fa-trash-alt fa-3x mb-3" style="color: #e74c3c;"></i>
+                <p style="margin-bottom: 15px; color: #ecf0f1;">
+                            Are you sure you want to delete 
+                    <strong id="deleteTripName" style="color: #3498db;"></strong>?
+                        </p>
+                <div style="background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 8px; padding: 12px; margin: 15px 0;">
+                    <i class="fas fa-exclamation-circle me-2" style="color: #e74c3c;"></i>
+                    <span style="color: #ecf0f1;">This action cannot be undone and will affect all bookings for this trip.</span>
+                </div>
+            </div>
+            <div style="padding: 15px 25px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 10px;">
+                <button type="button" onclick="closeDeleteModal()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                <form id="deleteForm" method="post" asp-page-handler="Delete" style="flex: 1;">
+                        <input type="hidden" id="deleteTripId" name="id" />
+                    <button type="submit" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-trash me-2"></i>Delete
+                        </button>
+                    </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        /* MODAL POSITIONING - TRIPS PAGE */
+        #deleteModalOverlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            pointer-events: auto !important;
+        }
+        
+        #deleteModalDialog {
+            position: absolute !important;
+            z-index: 1000000 !important;
+        }
+    </style>
+    
+    <script>
+        // Navigate to trip details when card is clicked
+        function navigateToTripDetails(tripId) {
+            window.location.href = '/Trips/Details/' + tripId;
+        }
+
+        // Hover effects disabled for cleaner UI
+
+        function clearFilter() {
+            document.getElementById('DestinationId').value = '';
+            document.getElementById('tripFilterForm').submit();
+        }
+        
+        @if (User.IsInRole("Admin"))
+        {
+            <text>
+            function confirmDelete(id, name) {
+                document.getElementById('deleteTripId').value = id;
+                document.getElementById('deleteTripName').textContent = name;
+                showDeleteModal();
+            }
+
+            // Custom modal functions
+            function showDeleteModal() {
+                var overlay = document.getElementById('deleteModalOverlay');
+                var dialog = document.getElementById('deleteModalDialog');
+                
+                // Calculate center position in current viewport (slightly higher than center)
+                var scrollTop = window.scrollY;
+                var windowHeight = window.innerHeight;
+                var modalHeight = 350; // approximate modal height
+                var centerY = scrollTop + (windowHeight - modalHeight) / 2 - 60; // 60px higher than center
+                
+                // Position modal exactly where user is looking
+                dialog.style.top = Math.max(scrollTop + 20, centerY) + 'px'; // never go above viewport + 20px
+                dialog.style.left = '50%';
+                dialog.style.transform = 'translateX(-50%)';
+                
+                // Show modal
+                overlay.style.display = 'block';
+            }
+
+            function closeDeleteModal() {
+                // Hide modal
+                document.getElementById('deleteModalOverlay').style.display = 'none';
+            }
+
+            // Close modal when clicking outside
+            document.getElementById('deleteModalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDeleteModal();
+                }
+            });
+
+            // Also allow ESC key to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('deleteModalOverlay').style.display === 'block') {
+                    closeDeleteModal();
+                }
+            });
+            </text>
+        }
+        
+        // JavaScript modal centering solution
+        $(document).ready(function() {
+            function alignModal() {
+                setTimeout(function() {
+                    var modal = $('.modal.show');
+                    var modalDialog = modal.find(".modal-dialog");
+                    var modalContent = modal.find(".modal-content");
+                    
+                    var windowHeight = $(window).height();
+                    var contentHeight = modalContent.outerHeight(true);
+                    var topMargin = Math.max(20, (windowHeight - contentHeight) / 2);
+                    
+                    modalDialog.removeClass('modal-dialog-centered');
+                    modalDialog.css({
+                        "margin-top": topMargin + "px",
+                        "margin-bottom": "20px"
+                    });
+                }, 50);
+            }
+            
+            $(".modal").on("shown.bs.modal", alignModal);
+            $(window).on("resize", function() {
+                $(".modal:visible").each(function() {
+                    alignModal();
+                });
+            });
+        });
+    </script>
+} 

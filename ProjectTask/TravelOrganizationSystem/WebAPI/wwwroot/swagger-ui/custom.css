@@ -1,0 +1,35 @@
+/* Simple styles for Swagger UI to enhance readability */
+
+/* Make descriptions more readable */
+.opblock-summary-description {
+    font-weight: 500 !important;
+    color: #3b4151 !important;
+    font-size: 14px !important;
+}
+
+/* Make [ADMIN] tags stand out */
+.opblock-summary-description strong,
+.opblock-summary strong {
+    background-color: #9012fe;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+/* Make the summary larger */
+.opblock-summary {
+    padding: 10px !important;
+}
+
+/* Improve spacing */
+.opblock {
+    margin: 0 0 15px 0 !important;
+}
+
+/* Make admin text visible in expanded view */
+span[data-original-title*="ADMIN"],
+span[data-original-title*="Admin"] {
+    font-weight: bold;
+    color: #9012fe;
+} 
