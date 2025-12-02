@@ -23,6 +23,7 @@ appsettings.json
 appsettings.Development.json
 appsettings.Production.json
 appsettings.*.json
+!appsettings.example.json
 *.config
 
 # Environment variables and secrets
