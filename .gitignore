@@ -43,6 +43,12 @@ secrets.json
 *.sqlite3
 *.mdf
 *.ldf
+*.bak
+
+# Docker SQL Server data
+ProjectTask/Database/data/
+ProjectTask/Database/data-*/
+ProjectTask/Database/.env
 
 # Logs
 logs/

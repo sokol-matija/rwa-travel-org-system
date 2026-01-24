@@ -20,12 +20,17 @@ builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowWebApp", builder =>
 	{
-		builder.WithOrigins("http://localhost:17001", "https://localhost:17001", "https://*.vercel.app")
+		builder.WithOrigins(
+				"http://localhost:16000",
+				"https://localhost:16001",
+				"http://localhost:17001",
+				"https://localhost:17001",
+				"https://*.vercel.app")
 			   .AllowAnyMethod()
 			   .AllowAnyHeader()
 			   .AllowCredentials(); // Allow cookies/credentials
 	});
-	
+
 	// Add a more permissive policy for production
 	options.AddPolicy("AllowAll", builder =>
 	{
@@ -127,44 +132,46 @@ builder.Services.AddSingleton<AuthorizeCheckOperationFilter>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments for testing
+app.UseSwagger(c =>
 {
-	app.UseSwagger(c => 
-	{
-		// Customize the Swagger JSON to better show descriptions
-		c.RouteTemplate = "swagger/{documentName}/swagger.json";
-	});
-	
-	app.UseSwaggerUI(c => 
-	{
-		c.SwaggerEndpoint("/swagger/v1/swagger.json", "Travel Organization API v1");
-		
-		// Custom display options to show endpoint descriptions
-		c.DefaultModelsExpandDepth(-1); // Hide the models by default
-		c.DisplayRequestDuration(); // Show the request duration
-		c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List); // Show endpoints as a list
-		c.EnableFilter(); // Enable filtering
-		c.EnableDeepLinking(); // Enable deep linking for navigation
-		
-		// Show operation description in the list view
-		c.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Example);
-		
-		// Additional configuration to show descriptions
-		c.ConfigObject.AdditionalItems.Add("tagsSorter", "alpha");
-		c.ConfigObject.AdditionalItems.Add("operationsSorter", "alpha");
-		c.ConfigObject.AdditionalItems.Add("displayOperationId", false); // Don't show operation ID
-		c.ConfigObject.AdditionalItems.Add("showExtensions", true);
-		c.ConfigObject.AdditionalItems.Add("showCommonExtensions", true);
-        
-        // Add custom CSS to enhance UI
-        c.InjectStylesheet("/swagger-ui/custom.css");
-	});
-}
+	// Customize the Swagger JSON to better show descriptions
+	c.RouteTemplate = "swagger/{documentName}/swagger.json";
+});
+
+app.UseSwaggerUI(c =>
+{
+	c.SwaggerEndpoint("/swagger/v1/swagger.json", "Travel Organization API v1");
+
+	// Custom display options to show endpoint descriptions
+	c.DefaultModelsExpandDepth(-1); // Hide the models by default
+	c.DisplayRequestDuration(); // Show the request duration
+	c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List); // Show endpoints as a list
+	c.EnableFilter(); // Enable filtering
+	c.EnableDeepLinking(); // Enable deep linking for navigation
+
+	// Show operation description in the list view
+	c.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Example);
+
+	// Additional configuration to show descriptions
+	c.ConfigObject.AdditionalItems.Add("tagsSorter", "alpha");
+	c.ConfigObject.AdditionalItems.Add("operationsSorter", "alpha");
+	c.ConfigObject.AdditionalItems.Add("displayOperationId", false); // Don't show operation ID
+	c.ConfigObject.AdditionalItems.Add("showExtensions", true);
+	c.ConfigObject.AdditionalItems.Add("showCommonExtensions", true);
+
+	// Add custom CSS to enhance UI
+	c.InjectStylesheet("/swagger-ui/custom.css");
+});
 
 // Enable static files middleware to serve custom CSS
 app.UseStaticFiles();
 
-app.UseHttpsRedirection();
+// Only redirect to HTTPS in production
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // Use different CORS policies based on environment
 if (app.Environment.IsDevelopment())
