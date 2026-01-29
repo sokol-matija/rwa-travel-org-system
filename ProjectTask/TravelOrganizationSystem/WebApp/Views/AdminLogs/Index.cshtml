@@ -1,0 +1,196 @@
+@model WebApp.ViewModels.AdminLogsIndexViewModel
+@{
+    ViewData["Title"] = "System Logs";
+}
+
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="dark-theme-section-title">
+            <i class="fas fa-file-alt me-3"></i>@ViewData["Title"]
+        </h1>
+        <p class="dark-theme-section-subtitle">Monitor system activity and troubleshoot issues</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger dark-theme-alert" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+        </div>
+    }
+
+    <!-- Logs Summary Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="dark-theme-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1 fw-bold" style="color: #3498db;">
+                                <i class="fas fa-database me-2"></i>Log Entries
+                            </h5>
+                            <p class="mb-0" style="color: #bdc3c7;">
+                                @if (Model.TotalCount > 0)
+                                {
+                                    <span>Showing @Model.StartLogNumber - @Model.EndLogNumber of @Model.TotalCount total logs</span>
+                                }
+                                else
+                                {
+                                    <span>No logs found</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge" style="background: linear-gradient(135deg, #3498db, #2ecc71); font-size: 1rem; padding: 0.5rem 1rem;">
+                                Page @Model.Page of @Model.TotalPages
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Table -->
+    @if (Model.Logs.Any())
+    {
+        <div class="dark-theme-card">
+            <div class="card-header border-0" style="background: rgba(52, 152, 219, 0.1);">
+                <h5 class="mb-0 fw-bold" style="color: #3498db;">
+                    <i class="fas fa-list me-2"></i>Recent Activity
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" style="color: #ecf0f1;">
+                        <thead style="background: rgba(52, 152, 219, 0.1); border-bottom: 2px solid rgba(52, 152, 219, 0.3);">
+                            <tr>
+                                <th style="width: 80px; color: #3498db;" class="text-center">
+                                    <i class="fas fa-hashtag me-1"></i>ID
+                                </th>
+                                <th style="width: 180px; color: #3498db;">
+                                    <i class="fas fa-clock me-1"></i>Timestamp
+                                </th>
+                                <th style="width: 120px; color: #3498db;" class="text-center">
+                                    <i class="fas fa-layer-group me-1"></i>Level
+                                </th>
+                                <th style="color: #3498db;">
+                                    <i class="fas fa-comment-alt me-1"></i>Message
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in Model.Logs)
+                            {
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td class="text-center" style="color: #bdc3c7;">
+                                        #@log.Id
+                                    </td>
+                                    <td style="color: #95a5a6; font-family: 'Courier New', monospace; font-size: 0.9rem;">
+                                        @log.FormattedTimestamp
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge @log.LevelBadgeClass px-3 py-2">
+                                            <i class="@log.LevelIcon me-1"></i>
+                                            @log.Level
+                                        </span>
+                                    </td>
+                                    <td style="color: #ecf0f1; word-break: break-word;">
+                                        @log.Message
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="mt-4">
+                <nav aria-label="Logs pagination">
+                    <ul class="pagination justify-content-center flex-wrap">
+                        <!-- Previous Button -->
+                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                            <a class="page-link" 
+                               href="@(Model.HasPreviousPage ? Model.GetPageUrl(Model.Page - 1) : "#")"
+                               style="background: rgba(52, 152, 219, 0.1); border-color: rgba(52, 152, 219, 0.3); color: #3498db;">
+                                <i class="fas fa-chevron-left me-1"></i>Previous
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        @foreach (var pageNumber in Model.GetPaginationNumbers())
+                        {
+                            if (pageNumber == -1)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link" style="background: rgba(52, 152, 219, 0.05); border-color: rgba(52, 152, 219, 0.3); color: #7f8c8d;">
+                                        ...
+                                    </span>
+                                </li>
+                            }
+                            else if (pageNumber == Model.Page)
+                            {
+                                <li class="page-item active">
+                                    <span class="page-link" style="background: linear-gradient(135deg, #3498db, #2ecc71); border-color: #3498db; color: white; font-weight: bold;">
+                                        @pageNumber
+                                    </span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" 
+                                       href="@Model.GetPageUrl(pageNumber)"
+                                       style="background: rgba(52, 152, 219, 0.1); border-color: rgba(52, 152, 219, 0.3); color: #3498db;">
+                                        @pageNumber
+                                    </a>
+                                </li>
+                            }
+                        }
+
+                        <!-- Next Button -->
+                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                            <a class="page-link" 
+                               href="@(Model.HasNextPage ? Model.GetPageUrl(Model.Page + 1) : "#")"
+                               style="background: rgba(52, 152, 219, 0.1); border-color: rgba(52, 152, 219, 0.3); color: #3498db;">
+                                Next<i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="dark-theme-card p-5">
+                <div class="empty-state">
+                    <i class="fas fa-inbox fa-4x mb-3" style="color: #3498db; opacity: 0.7;"></i>
+                    <h5 style="color: #ecf0f1;">No logs available</h5>
+                    <p style="color: #bdc3c7;">System logs will appear here as they are generated.</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Back to Admin Panel -->
+    <div class="mt-4 text-center">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i>Back to Home
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-scroll to top on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+}
