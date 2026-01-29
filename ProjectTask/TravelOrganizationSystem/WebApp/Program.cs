@@ -9,14 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 if (builder.Environment.IsDevelopment())
 {
     // Enable runtime compilation for hot reload in development
-    builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+    builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 }
 else
 {
-    builder.Services.AddRazorPages();
+    builder.Services.AddControllersWithViews();
 }
-builder.Services.AddServerSideBlazor();
-builder.Services.AddControllers();
 
 // Add HttpClient factory
 builder.Services.AddHttpClient();
@@ -94,7 +92,9 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorPages();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapControllers(); // Map API controllers
 
 app.Run();
