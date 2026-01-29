@@ -1,0 +1,474 @@
+@model WebApp.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<style>
+
+
+    .hero-section {
+        position: relative;
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.8), rgba(46, 204, 113, 0.8)),
+                    url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1121&q=80') no-repeat center center;
+        background-size: cover;
+        color: white;
+        padding: 6rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-section .lead {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        font-weight: 300;
+        text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Modern hero buttons - centered and styled like footer buttons */
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+        min-width: 200px;
+        justify-content: center;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-btn-primary {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.9));
+        color: white;
+        border-color: rgba(52, 152, 219, 0.3);
+    }
+
+    .hero-btn-secondary {
+        background: linear-gradient(135deg, rgba(46, 204, 113, 0.9), rgba(39, 174, 96, 0.9));
+        color: white;
+        border-color: rgba(46, 204, 113, 0.3);
+    }
+
+    .hero-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .hero-btn:hover::before {
+        left: 100%;
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-btn-primary:hover {
+        border-color: rgba(52, 152, 219, 0.6);
+        background: linear-gradient(135deg, rgba(41, 128, 185, 1), rgba(52, 152, 219, 1));
+    }
+
+    .hero-btn-secondary:hover {
+        border-color: rgba(46, 204, 113, 0.6);
+        background: linear-gradient(135deg, rgba(39, 174, 96, 1), rgba(46, 204, 113, 1));
+    }
+
+    .hero-btn i {
+        margin-right: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .hero-btn:hover i {
+        transform: scale(1.2);
+    }
+
+    .section-title {
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        color: #ecf0f1;
+    }
+
+    .section-subtitle {
+        text-align: center;
+        color: #bdc3c7;
+        margin-bottom: 2rem;
+    }
+
+    .destination-card {
+        height: 100%;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        color: #f1f3f4;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow:
+            0 10px 40px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .destination-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.3), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .destination-card:hover {
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
+        border-color: rgba(52, 152, 219, 0.4);
+        box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.6),
+            0 0 0 2px rgba(52, 152, 219, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        transform: translateY(-8px) scale(1.03);
+    }
+
+    .destination-card:active {
+        transform: translateY(-4px) scale(1.01);
+        transition: all 0.1s ease;
+    }
+
+    .destination-card:hover::before {
+        opacity: 1;
+    }
+
+    .destination-card .card-title {
+        color: #3498db;
+        font-weight: 600;
+    }
+
+    .destination-card .card-text {
+        color: #bdc3c7;
+    }
+
+    .destination-card .card-img-top {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 20px 20px 0 0;
+        transition: transform 0.3s ease;
+    }
+
+    .destination-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+
+    /* Enhanced button styles for destination cards */
+    .destination-card .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .destination-card .btn-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .destination-card .btn-primary:hover {
+        background: linear-gradient(135deg, #2980b9, #1a5490);
+        box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .destination-card .btn-outline-primary {
+        background: rgba(52, 152, 219, 0.1);
+        border: 2px solid rgba(52, 152, 219, 0.3);
+        color: #3498db;
+        backdrop-filter: blur(10px);
+    }
+
+    .destination-card .btn-outline-primary:hover {
+        background: rgba(52, 152, 219, 0.2);
+        border-color: rgba(52, 152, 219, 0.5);
+        color: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .feature-card {
+        text-align: center;
+        padding: 2rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: all var(--transition-medium) ease;
+        height: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, #34495e, #2c3e50);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .feature-card h4 {
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: #ecf0f1;
+    }
+
+    .feature-card p {
+        color: #bdc3c7;
+        margin-bottom: 0;
+    }
+
+    /* Improved responsive behavior for destination cards */
+    .destinations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-section {
+            padding: 4rem 1rem;
+        }
+
+        .hero-section h1 {
+            font-size: 2.2rem;
+        }
+
+        .hero-section .lead {
+            font-size: 1.2rem;
+        }
+
+        .hero-buttons {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .hero-btn {
+            min-width: 240px;
+        }
+
+        .destinations-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .hero-btn {
+            min-width: 200px;
+            padding: 0.8rem 1.5rem;
+        }
+
+        .destinations-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="glow-text">Discover Your Next Adventure</h1>
+        <p class="lead">Explore amazing destinations and create unforgettable memories</p>
+        <div class="hero-buttons">
+            <a asp-controller="Destinations" asp-action="Index" class="hero-btn hero-btn-primary">
+                <i class="fas fa-search"></i> Explore Destinations
+            </a>
+            <a asp-controller="Trips" asp-action="Index" class="hero-btn hero-btn-secondary">
+                <i class="fas fa-plane"></i> Find Trips
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h2 class="section-title">Featured Destinations</h2>
+        <p class="section-subtitle">Popular places loved by our travelers</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-warning mt-4" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+    </div>
+}
+
+<div class="destinations-grid mt-4">
+    @if (Model.FeaturedDestinations.Any())
+    {
+        @foreach (var destination in Model.FeaturedDestinations)
+        {
+            <div class="card destination-card" onclick="viewTripsForDestination(@destination.Id)" style="cursor: pointer;">
+                @if (!string.IsNullOrEmpty(destination.ImageUrl))
+                {
+                    <img src="@destination.ImageUrl" class="card-img-top" alt="@destination.Name"
+                         onerror="this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80';">
+                }
+                else
+                {
+                    <!-- Default travel image if no destination image is available -->
+                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
+                         class="card-img-top" alt="@destination.Name">
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@destination.Location</h5>
+                    <p class="card-text">
+                        @if (!string.IsNullOrEmpty(destination.Description))
+                        {
+                            @destination.Description
+                        }
+                        else
+                        {
+                            <text>Discover the beauty and culture of @destination.Name. Book your adventure today!</text>
+                        }
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Trips" asp-action="Index" asp-route-DestinationId="@destination.Id"
+                           class="btn btn-sm btn-primary btn-animated flex-grow-1"
+                           onclick="event.stopPropagation();">
+                            <i class="fas fa-plane me-1"></i>View Trips
+                        </a>
+                        <a asp-controller="Destinations" asp-action="Details" asp-route-id="@destination.Id"
+                           class="btn btn-sm btn-outline-primary btn-animated"
+                           onclick="event.stopPropagation();">
+                            <i class="fas fa-info-circle me-1"></i>Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- Fallback if no destinations are loaded -->
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                No featured destinations available at the moment.
+                <a asp-controller="Destinations" asp-action="Index" class="alert-link">Browse all destinations</a>.
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h2 class="section-title">Why Choose Us</h2>
+    </div>
+</div>
+
+<div class="row mt-3 g-4">
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-thumbs-up"></i>
+            </div>
+            <h4>Best Price Guarantee</h4>
+            <p>We offer the best prices for your travel needs with no hidden fees.</p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+            <h4>24/7 Customer Support</h4>
+            <p>Our dedicated team is available anytime to assist with your travel questions.</p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h4>Safe & Secure Booking</h4>
+            <p>Your personal information is protected with our secure booking system.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Function to navigate to trips filtered by destination
+        function viewTripsForDestination(destinationId) {
+            window.location.href = '@Url.Action("Index", "Trips")' + '?DestinationId=' + destinationId;
+        }
+
+        // Add smooth hover effects to destination cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.destination-card');
+
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.03)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(-4px) scale(1.02)';
+                });
+            });
+        });
+
+        // Handle image loading errors gracefully
+        function handleImageError(img) {
+            img.onerror = null; // Prevent infinite loop
+            img.src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80';
+            img.alt = 'Travel destination';
+        }
+    </script>
+}

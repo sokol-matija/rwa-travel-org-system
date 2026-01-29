@@ -1,0 +1,337 @@
+@model DestinationIndexViewModel
+@{
+    ViewData["Title"] = "Destinations";
+}
+
+<style>
+    /* Disable all hover effects on destinations page */
+    .dark-theme-card:hover {
+        border-color: inherit !important;
+        box-shadow: inherit !important;
+        transform: none !important;
+    }
+
+    .dark-theme-card:hover::before {
+        opacity: inherit !important;
+    }
+
+    .clickable-card:hover {
+        transform: none !important;
+        box-shadow: inherit !important;
+    }
+
+    .btn:hover,
+    .btn:focus {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Remove all transitions for static feel - EXCEPT modals */
+    .dark-theme-card:not(.modal-content),
+    .clickable-card,
+    .btn:not(.modal-content .btn) {
+        transition: none !important;
+    }
+
+    /* Destination Cards Responsive Layout Improvements */
+    .destination-card-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .destination-card-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .destination-card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .destination-card-info {
+        flex: 1;
+    }
+
+    .destination-card-footer {
+        margin-top: auto;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    /* Ensure consistent card heights */
+    .clickable-card.h-100 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .clickable-card .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .clickable-card .card-footer {
+        margin-top: auto;
+    }
+
+</style>
+
+<div class="container mt-4 destinations-page">
+    <div class="text-center mb-5">
+        <h1 class="dark-theme-section-title">
+            <i class="fas fa-globe-americas me-3"></i>@ViewData["Title"]
+        </h1>
+        <p class="dark-theme-section-subtitle">Explore amazing places around the world</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+    {
+        <div class="alert alert-success alert-dismissible fade show dark-theme-alert" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger dark-theme-alert" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+        </div>
+    }
+
+    <!-- Destinations Grid -->
+    @if (Model.Destinations.Any())
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="col">
+                    <a asp-controller="Destinations" asp-action="Create" class="admin-card-link">
+                        <div class="admin-card h-100">
+                            <div class="card-body">
+                                <button type="button" class="admin-plus-circle">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <h5 class="card-title">Add New Destination</h5>
+                                <p class="card-text">Create a new destination to offer amazing travel experiences</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+
+            <!-- Custom Delete Confirmation Modal -->
+            <div id="deleteModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999;">
+                <div id="deleteModalDialog" style="position: absolute; background: #2c3e50; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); width: 450px; max-width: 90vw; max-height: 90vh; border: 2px solid rgba(52, 152, 219, 0.4);">
+                    <div style="padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                        <h5 style="margin: 0; color: #ecf0f1; font-weight: bold;">
+                            <i class="fas fa-exclamation-triangle me-2" style="color: #e74c3c;"></i>
+                                Confirm Delete
+                            </h5>
+                        <button onclick="closeDeleteModal()" style="float: right; margin-top: -25px; background: none; border: none; color: #bdc3c7; font-size: 20px; cursor: pointer;">&times;</button>
+                        </div>
+                    <div style="padding: 25px; text-align: center;">
+                        <i class="fas fa-trash-alt fa-3x mb-3" style="color: #e74c3c;"></i>
+                        <p style="margin-bottom: 15px; color: #ecf0f1;">
+                                    Are you sure you want to delete
+                            <strong id="deleteDestinationName" style="color: #3498db;"></strong>?
+                                </p>
+                        <div style="background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 8px; padding: 12px; margin: 15px 0;">
+                            <i class="fas fa-exclamation-circle me-2" style="color: #e74c3c;"></i>
+                            <span style="color: #ecf0f1;">This action cannot be undone and will affect all related trips.</span>
+                        </div>
+                    </div>
+                    <div style="padding: 15px 25px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 10px;">
+                        <button type="button" onclick="closeDeleteModal()" style="flex: 1; background: #6c757d; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                        <form id="deleteForm" method="post" asp-controller="Destinations" asp-action="Delete" style="flex: 1;">
+                                <input type="hidden" id="deleteDestinationId" name="id" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </button>
+                            </form>
+                    </div>
+                </div>
+            </div>
+
+            @foreach (var destination in Model.Destinations)
+            {
+                <div class="col">
+                    <div class="dark-theme-card h-100 clickable-card" onclick="navigateToDestinationDetails(@destination.Id)" style="cursor: pointer;">
+                        <div class="position-relative">
+                            @if (!string.IsNullOrEmpty(destination.ImageUrl))
+                            {
+                                <img src="@destination.ImageUrl" class="card-img-top" alt="@destination.Name" style="height: 250px; object-fit: cover; border-radius: 20px 20px 0 0;">
+                            }
+                            else
+                            {
+                                <div class="card-img-top d-flex justify-content-center align-items-center" style="height: 250px; background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(46, 204, 113, 0.2)); border-radius: 20px 20px 0 0;">
+                                    <i class="fas fa-mountain fa-4x" style="color: #3498db; opacity: 0.7;"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold" style="color: #3498db;">@destination.Name</h5>
+                            <h6 class="card-subtitle mb-3" style="color: #2ecc71;">
+                                <i class="fas fa-map-marker-alt me-1"></i>@destination.Location
+                            </h6>
+                            @if (!string.IsNullOrEmpty(destination.Description))
+                            {
+                                <p class="card-text mb-3" style="color: #bdc3c7; line-height: 1.5;">
+                                    @(destination.Description.Length > 120 ? destination.Description.Substring(0, 120) + "..." : destination.Description)
+                                </p>
+                            }
+
+                            <div class="row g-2 mb-3">
+                                @if (!string.IsNullOrEmpty(destination.Climate))
+                                {
+                                    <div class="col-6">
+                                        <small class="badge dark-theme-badge badge-warning">
+                                            <i class="fas fa-sun me-1"></i>@destination.Climate
+                                        </small>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(destination.BestTimeToVisit))
+                                {
+                                    <div class="col-6">
+                                        <small class="badge dark-theme-badge badge-info">
+                                            <i class="fas fa-calendar-alt me-1"></i>@destination.BestTimeToVisit
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer" style="background: rgba(255, 255, 255, 0.02); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a asp-controller="Destinations" asp-action="Details" asp-route-id="@destination.Id" class="btn btn-sm btn-primary" onclick="event.stopPropagation();">
+                                    <i class="fas fa-info-circle me-1"></i> Details
+                                </a>
+                                <a asp-controller="Trips" asp-action="Index" asp-route-destinationId="@destination.Id" class="btn btn-sm btn-outline-secondary" onclick="event.stopPropagation();">
+                                    <i class="fas fa-plane-departure me-1"></i> Trips
+                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <div class="ms-auto d-flex gap-1">
+                                        <a asp-controller="Destinations" asp-action="Edit" asp-route-id="@destination.Id" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation();">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                onclick="event.stopPropagation(); confirmDelete(@destination.Id, '@destination.Name');">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="dark-theme-card p-5">
+                <div class="empty-state">
+                    <i class="fas fa-globe fa-4x mb-4" style="color: #3498db; opacity: 0.7;"></i>
+                    <h3 class="mb-3" style="color: #ecf0f1;">No Destinations Available</h3>
+                    <p class="mb-4" style="color: #bdc3c7; font-size: 1.1rem;">
+                        We're working on adding amazing destinations for you to explore. Check back soon!
+                    </p>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Destinations" asp-action="Create" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Add First Destination
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <style>
+        /* MODAL POSITIONING - DESTINATIONS PAGE */
+        #deleteModalOverlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            pointer-events: auto !important;
+        }
+
+        #deleteModalDialog {
+            position: absolute !important;
+            z-index: 1000000 !important;
+        }
+    </style>
+
+    <script>
+        // Navigate to destination details when card is clicked
+        function navigateToDestinationDetails(destinationId) {
+            window.location.href = '/Destinations/Details/' + destinationId;
+        }
+
+        // Hover effects disabled for cleaner UI
+    </script>
+    @if (User.IsInRole("Admin"))
+    {
+        <script>
+            function confirmDelete(id, name) {
+                document.getElementById('deleteDestinationId').value = id;
+                document.getElementById('deleteDestinationName').textContent = name;
+                showDeleteModal();
+            }
+
+            // Custom modal functions
+            function showDeleteModal() {
+                var overlay = document.getElementById('deleteModalOverlay');
+                var dialog = document.getElementById('deleteModalDialog');
+
+                // Calculate center position in current viewport (slightly higher than center)
+                var scrollTop = window.scrollY;
+                var windowHeight = window.innerHeight;
+                var modalHeight = 350; // approximate modal height
+                var centerY = scrollTop + (windowHeight - modalHeight) / 2 - 60; // 60px higher than center
+
+                // Position modal exactly where user is looking
+                dialog.style.top = Math.max(scrollTop + 20, centerY) + 'px'; // never go above viewport + 20px
+                dialog.style.left = '50%';
+                dialog.style.transform = 'translateX(-50%)';
+
+                // Show modal
+                overlay.style.display = 'block';
+            }
+
+            function closeDeleteModal() {
+                // Hide modal
+                document.getElementById('deleteModalOverlay').style.display = 'none';
+            }
+
+            // Close modal when clicking outside
+            document.getElementById('deleteModalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeDeleteModal();
+                }
+            });
+
+            // Also allow ESC key to close modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('deleteModalOverlay').style.display === 'block') {
+                    closeDeleteModal();
+                }
+            });
+        </script>
+    }
+}

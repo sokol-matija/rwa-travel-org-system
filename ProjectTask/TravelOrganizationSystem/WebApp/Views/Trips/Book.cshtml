@@ -1,0 +1,84 @@
+@model WebApp.ViewModels.TripBookViewModel
+@{
+    ViewData["Title"] = "Book Trip";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger dark-theme-alert" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+                </div>
+            }
+
+            @if (Model.Trip != null)
+            {
+                <div class="dark-theme-card">
+                    <div class="card-header border-0" style="background: rgba(46, 204, 113, 0.1);">
+                        <h4 class="mb-0 fw-bold" style="color: #2ecc71;">
+                            <i class="fas fa-ticket-alt me-2"></i>Book Your Trip
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                @if (!string.IsNullOrEmpty(Model.Trip.ImageUrl))
+                                {
+                                    <img src="@Model.Trip.ImageUrl" class="img-fluid rounded" alt="@Model.Trip.Title">
+                                }
+                            </div>
+                            <div class="col-md-8">
+                                <h5 class="fw-bold" style="color: #3498db;">@Model.Trip.Title</h5>
+                                <p style="color: #bdc3c7;">
+                                    <i class="fas fa-map-marker-alt me-1"></i>@Model.Trip.DestinationName
+                                </p>
+                                <p style="color: #bdc3c7;">
+                                    <i class="fas fa-calendar-alt me-1"></i>@Model.Trip.StartDate.ToString("MMM d") - @Model.Trip.EndDate.ToString("MMM d, yyyy")
+                                </p>
+                                <p style="color: #2ecc71; font-size: 1.5rem; font-weight: bold;">
+                                    <i class="fas fa-tag me-1"></i>@Model.Trip.FormattedPrice per person
+                                </p>
+                                <p style="color: #bdc3c7;">
+                                    <i class="fas fa-users me-1"></i>@Model.Trip.AvailableSlots spots remaining
+                                </p>
+                            </div>
+                        </div>
+
+                        <form method="post" asp-controller="Trips" asp-action="Book" class="dark-theme-form">
+                            <input type="hidden" asp-for="TripId" />
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-4">
+                                <label asp-for="NumberOfParticipants" class="form-label fw-medium" style="color: #ecf0f1;">
+                                    <i class="fas fa-user-friends me-1"></i>Number of Participants
+                                </label>
+                                <select asp-for="NumberOfParticipants" class="form-select">
+                                    @for (int i = 1; i <= Math.Min(10, Model.Trip.AvailableSlots); i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="NumberOfParticipants" class="text-danger"></span>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex">
+                                <button type="submit" class="btn btn-success btn-lg flex-fill">
+                                    <i class="fas fa-check me-2"></i>Confirm Booking
+                                </button>
+                                <a asp-controller="Trips" asp-action="Details" asp-route-id="@Model.TripId" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

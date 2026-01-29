@@ -1,0 +1,154 @@
+@model WebApp.ViewModels.TripDetailsViewModel
+@{
+    ViewData["Title"] = Model.Trip?.Title ?? "Trip Details";
+}
+
+<div class="container mt-4 trip-detail-page">
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger dark-theme-alert" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+        </div>
+    }
+    
+    @if (Model.Trip != null)
+    {
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="dark-theme-card p-0 overflow-hidden">
+                    <div class="position-relative">
+                        @if (!string.IsNullOrEmpty(Model.Trip.ImageUrl))
+                        {
+                            <img src="@Model.Trip.ImageUrl" class="img-fluid w-100" alt="@Model.Trip.Title" style="height: 300px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-center align-items-center" style="height: 300px; background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(46, 204, 113, 0.2));">
+                                <i class="fas fa-plane-departure fa-4x" style="color: #3498db;"></i>
+                            </div>
+                        }
+                        
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <div class="badge dark-theme-badge badge-success fs-6 px-3 py-2">
+                                <i class="fas fa-tag me-2"></i>@Model.Trip.FormattedPrice
+                            </div>
+                        </div>
+                        
+                        <div class="position-absolute bottom-0 start-0 m-3">
+                            @if (Model.Trip.IsFull)
+                            {
+                                <span class="badge dark-theme-badge badge-danger fs-6 px-3 py-2">
+                                    <i class="fas fa-times-circle me-2"></i>Fully Booked
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge dark-theme-badge badge-success fs-6 px-3 py-2">
+                                    <i class="fas fa-check-circle me-2"></i>Available
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dark-theme-card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4 fw-bold" style="color: #3498db;">
+                            <i class="fas fa-info-circle me-2"></i>Trip Overview
+                        </h5>
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-alt me-3" style="color: #f39c12;"></i>
+                            <span style="color: #ecf0f1;">@Model.Trip.StartDate.ToString("MMM d, yyyy") - @Model.Trip.EndDate.ToString("MMM d, yyyy")</span>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fas fa-clock me-3" style="color: #9b59b6;"></i>
+                            <span style="color: #ecf0f1;">@Model.Trip.DurationInDays days</span>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fas fa-map-marker-alt me-3" style="color: #e74c3c;"></i>
+                            <span style="color: #ecf0f1;">@Model.Trip.DestinationName</span>
+                        </div>
+                        <div>
+                            <i class="fas fa-users me-3" style="color: #2ecc71;"></i>
+                            <span style="color: #ecf0f1;">@Model.Trip.AvailableSlots of @Model.Trip.Capacity spots</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-7">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb" style="background: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 0.75rem 1rem;">
+                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" style="color: #3498db;"><i class="fas fa-home me-1"></i>Home</a></li>
+                        <li class="breadcrumb-item"><a asp-controller="Trips" asp-action="Index" style="color: #3498db;"><i class="fas fa-suitcase me-1"></i>Trips</a></li>
+                        <li class="breadcrumb-item active" style="color: #ecf0f1;">@Model.Trip.Title</li>
+                    </ol>
+                </nav>
+                
+                <h1 class="display-4 fw-bold mb-3 text-center" style="color: #3498db;">@Model.Trip.Title</h1>
+                
+                <div class="dark-theme-card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3 fw-bold" style="color: #2ecc71;">
+                            <i class="fas fa-scroll me-2"></i>Trip Description
+                        </h5>
+                        <div style="color: #ecf0f1; line-height: 1.7;">@Model.Trip.Description</div>
+                    </div>
+                </div>
+                
+                @if (Model.Destination != null)
+                {
+                    <div class="dark-theme-card mb-4">
+                        <div class="card-header border-0 pb-0" style="background: rgba(52, 152, 219, 0.1);">
+                            <h5 class="mb-0 fw-bold" style="color: #3498db;">
+                                <i class="fas fa-map-marker-alt me-2"></i>Destination Information
+                            </h5>
+                        </div>
+                        <div class="card-body pt-3">
+                            <h6 class="mb-3 fw-bold" style="color: #ecf0f1;">
+                                <i class="fas fa-globe me-2" style="color: #e74c3c;"></i>
+                                @Model.Destination.Name, @Model.Destination.Country
+                            </h6>
+                            <p style="color: #ecf0f1;">@Model.Destination.Description</p>
+                        </div>
+                    </div>
+                }
+                
+                <div class="dark-theme-card">
+                    <div class="card-body text-center">
+                        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+                            <a asp-controller="Trips" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Trips
+                            </a>
+                            
+                            @if (!Model.Trip.IsFull)
+                            {
+                                <a asp-controller="Trips" asp-action="Book" asp-route-id="@Model.Trip.Id" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-calendar-check me-2"></i>Book This Trip
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary btn-lg" disabled>
+                                    <i class="fas fa-times-circle me-2"></i>Fully Booked
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="text-center py-5">
+            <div class="dark-theme-card p-5">
+                <i class="fas fa-search fa-4x mb-4" style="color: #f39c12;"></i>
+                <h3 class="mb-3" style="color: #ecf0f1;">Trip Not Found</h3>
+                <a asp-controller="Trips" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="fas fa-arrow-left me-2"></i>Return to Trips
+                </a>
+            </div>
+        </div>
+    }
+</div>

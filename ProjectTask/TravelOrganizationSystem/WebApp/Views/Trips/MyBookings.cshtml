@@ -1,0 +1,98 @@
+@model WebApp.ViewModels.MyBookingsViewModel
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="dark-theme-section-title">
+            <i class="fas fa-calendar-check me-3"></i>@ViewData["Title"]
+        </h1>
+        <p class="dark-theme-section-subtitle">View and manage your trip bookings</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+    {
+        <div class="alert alert-success alert-dismissible fade show dark-theme-alert" role="alert">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+    {
+        <div class="alert alert-danger alert-dismissible fade show dark-theme-alert" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger dark-theme-alert" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>@Model.ErrorMessage
+        </div>
+    }
+
+    @if (Model.Bookings != null && Model.Bookings.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var booking in Model.Bookings)
+            {
+                <div class="col">
+                    <div class="dark-theme-card h-100">
+                        <div class="card-header border-0" style="background: rgba(52, 152, 219, 0.1);">
+                            <h5 class="mb-0 fw-bold" style="color: #3498db;">@booking.TripName</h5>
+                        </div>
+                        <div class="card-body">
+                            <p style="color: #bdc3c7;">
+                                <i class="fas fa-map-marker-alt me-2" style="color: #e74c3c;"></i>@booking.DestinationName
+                            </p>
+                            <p style="color: #bdc3c7;">
+                                <i class="fas fa-calendar-alt me-2" style="color: #f39c12;"></i>
+                                @booking.StartDate.ToString("MMM d") - @booking.EndDate.ToString("MMM d, yyyy")
+                            </p>
+                            <p style="color: #bdc3c7;">
+                                <i class="fas fa-users me-2" style="color: #9b59b6;"></i>@booking.NumberOfParticipants participant(s)
+                            </p>
+                            <p style="color: #2ecc71; font-weight: bold;">
+                                <i class="fas fa-tag me-2"></i>Total: @booking.TotalPrice.ToString("C")
+                            </p>
+                            <span class="badge @(booking.Status == "Confirmed" ? "bg-success" : booking.Status == "Cancelled" ? "bg-danger" : "bg-warning")">
+                                @booking.Status
+                            </span>
+                        </div>
+                        <div class="card-footer" style="background: rgba(255, 255, 255, 0.02); border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div class="d-flex gap-2">
+                                <a asp-controller="Trips" asp-action="Details" asp-route-id="@booking.TripId" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-info-circle me-1"></i>View Trip
+                                </a>
+                                @if (booking.Status == "Confirmed")
+                                {
+                                    <form method="post" asp-controller="Trips" asp-action="CancelBooking" asp-route-id="@booking.Id" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="dark-theme-card p-5">
+                <i class="fas fa-calendar-times fa-4x mb-4" style="color: #f39c12;"></i>
+                <h3 class="mb-3" style="color: #ecf0f1;">No Bookings Yet</h3>
+                <p class="mb-4" style="color: #bdc3c7;">Start exploring our amazing trips and book your next adventure!</p>
+                <a asp-controller="Trips" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>Browse Trips
+                </a>
+            </div>
+        </div>
+    }
+</div>
