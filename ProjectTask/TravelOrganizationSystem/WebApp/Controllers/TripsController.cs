@@ -1,16 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using WebApp.Models;
 using WebApp.Services;
+using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
-    /// <summary>
-    /// API Controller for handling AJAX requests from trip pages
-    /// Provides paginated trip data and filtering capabilities
-    /// </summary>
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TripsController : ControllerBase
+    public class TripsController : Controller
     {
         private readonly ITripService _tripService;
         private readonly IDestinationService _destinationService;
@@ -26,81 +23,417 @@ namespace WebApp.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Get paginated trips with optional destination filtering
-        /// Used for AJAX pagination and filtering
-        /// </summary>
-        /// <param name="page">Page number (1-based)</param>
-        /// <param name="pageSize">Number of items per page</param>
-        /// <param name="destinationId">Optional destination ID for filtering</param>
-        /// <returns>Paginated trip data with metadata</returns>
-        [HttpGet]
-        public async Task<IActionResult> GetTrips(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] int? destinationId = null)
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(int? DestinationId, int page = 1)
         {
+            var vm = new TripIndexViewModel
+            {
+                DestinationId = DestinationId,
+                Page = page < 1 ? 1 : page
+            };
+
             try
             {
-                _logger.LogInformation("AJAX request for trips - Page: {Page}, PageSize: {PageSize}, DestinationId: {DestinationId}", 
-                    page, pageSize, destinationId);
+                _logger.LogInformation("Loading trips page with destination filter: {DestinationId}, Page: {Page}", DestinationId, page);
 
-                // Validate parameters
-                if (page < 1) page = 1;
-                if (pageSize < 1 || pageSize > 50) pageSize = 10;
+                var destinations = await _destinationService.GetAllDestinationsAsync();
+                vm.Destinations = new SelectList(destinations, nameof(DestinationModel.Id), nameof(DestinationModel.Name));
 
-                // Get trips with pagination
-                var (trips, totalCount) = await _tripService.GetTripsAsync(page, pageSize, destinationId);
+                var (trips, totalCount) = await _tripService.GetTripsAsync(vm.Page, vm.PageSize, DestinationId);
 
-                // Calculate pagination metadata
-                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-                var hasNextPage = page < totalPages;
-                var hasPreviousPage = page > 1;
+                vm.Trips = trips;
+                vm.TotalTrips = totalCount;
+                vm.TotalPages = (int)Math.Ceiling((double)totalCount / vm.PageSize);
 
-                // Prepare response
-                var response = new
+                foreach (var trip in vm.Trips)
                 {
-                    trips = trips,
-                    pagination = new
+                    var destination = destinations.FirstOrDefault(d => d.Id == trip.DestinationId);
+                    if (destination != null && string.IsNullOrEmpty(trip.DestinationName))
                     {
-                        currentPage = page,
-                        pageSize = pageSize,
-                        totalItems = totalCount,
-                        totalPages = totalPages,
-                        hasNextPage = hasNextPage,
-                        hasPreviousPage = hasPreviousPage,
-                        startItem = ((page - 1) * pageSize) + 1,
-                        endItem = Math.Min(page * pageSize, totalCount)
+                        trip.DestinationName = destination.Name;
                     }
-                };
-
-                return Ok(response);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error handling AJAX trips request");
-                return StatusCode(500, new { message = "An error occurred while loading trips", details = ex.Message });
+                _logger.LogError(ex, "Error loading trips");
+                vm.ErrorMessage = $"Error loading trips: {ex.Message}";
+            }
+
+            return View(vm);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id, int? DestinationId, int page = 1)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting trip: {Id}", id);
+                var result = await _tripService.DeleteTripAsync(id);
+
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Trip deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to delete the trip. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting trip: {Id}", id);
+                TempData["ErrorMessage"] = $"An error occurred while deleting the trip: {ex.Message}";
+            }
+
+            return RedirectToAction("Index", new { DestinationId, page });
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var vm = new TripDetailsViewModel();
+
+            try
+            {
+                vm.Trip = await _tripService.GetTripByIdAsync(id.Value);
+                if (vm.Trip == null) return NotFound();
+
+                vm.Destination = await _destinationService.GetDestinationByIdAsync(vm.Trip.DestinationId);
+                if (vm.Destination != null)
+                {
+                    vm.Trip.DestinationName = vm.Destination.Name;
+                }
+            }
+            catch (Exception ex)
+            {
+                vm.ErrorMessage = $"Error loading trip details: {ex.Message}";
+            }
+
+            return View(vm);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            var vm = new CreateTripViewModel();
+            await LoadDestinationsForCreate(vm);
+            return View(vm);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateTripViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadDestinationsForCreate(vm);
+                return View(vm);
+            }
+
+            if (vm.Trip.StartDate >= vm.Trip.EndDate)
+            {
+                ModelState.AddModelError("Trip.EndDate", "End date must be after start date.");
+                await LoadDestinationsForCreate(vm);
+                return View(vm);
+            }
+
+            if (vm.Trip.StartDate < DateTime.Today)
+            {
+                ModelState.AddModelError("Trip.StartDate", "Start date cannot be in the past.");
+                await LoadDestinationsForCreate(vm);
+                return View(vm);
+            }
+
+            try
+            {
+                var trip = new TripModel
+                {
+                    Title = vm.Trip.Title,
+                    Description = vm.Trip.Description,
+                    StartDate = vm.Trip.StartDate,
+                    EndDate = vm.Trip.EndDate,
+                    Price = vm.Trip.Price,
+                    Capacity = vm.Trip.Capacity,
+                    ImageUrl = vm.Trip.ImageUrl,
+                    DestinationId = vm.Trip.DestinationId
+                };
+
+                var result = await _tripService.CreateTripAsync(trip);
+                if (result != null)
+                {
+                    TempData["SuccessMessage"] = "Trip created successfully!";
+                    return RedirectToAction("Index");
+                }
+
+                ModelState.AddModelError("", "Failed to create trip. Please try again.");
+                await LoadDestinationsForCreate(vm);
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating trip: {Title}", vm.Trip.Title);
+                ModelState.AddModelError("", "An error occurred while creating the trip. Please try again.");
+                await LoadDestinationsForCreate(vm);
+                return View(vm);
             }
         }
 
-        /// <summary>
-        /// Get available destinations for filter dropdown
-        /// Used for AJAX requests when refreshing filters
-        /// </summary>
-        /// <returns>List of destinations</returns>
-        [HttpGet("destinations")]
-        public async Task<IActionResult> GetDestinations()
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var trip = await _tripService.GetTripByIdAsync(id);
+                if (trip == null) return NotFound();
+
+                var vm = new EditTripViewModel
+                {
+                    Trip = new EditTripModel
+                    {
+                        Id = trip.Id,
+                        Title = trip.Title,
+                        Description = trip.Description,
+                        StartDate = trip.StartDate,
+                        EndDate = trip.EndDate,
+                        Price = trip.Price,
+                        Capacity = trip.Capacity,
+                        ImageUrl = trip.ImageUrl,
+                        DestinationId = trip.DestinationId
+                    }
+                };
+
+                await LoadDestinationsForEdit(vm);
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving trip for edit: {Id}", id);
+                TempData["ErrorMessage"] = "An error occurred while retrieving the trip.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditTripViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadDestinationsForEdit(vm);
+                return View(vm);
+            }
+
+            if (vm.Trip.StartDate >= vm.Trip.EndDate)
+            {
+                ModelState.AddModelError("Trip.EndDate", "End date must be after start date.");
+                await LoadDestinationsForEdit(vm);
+                return View(vm);
+            }
+
+            if (vm.Trip.StartDate < DateTime.Today)
+            {
+                ModelState.AddModelError("Trip.StartDate", "Start date cannot be in the past.");
+                await LoadDestinationsForEdit(vm);
+                return View(vm);
+            }
+
+            try
+            {
+                var tripModel = new TripModel
+                {
+                    Id = vm.Trip.Id,
+                    Title = vm.Trip.Title,
+                    Description = vm.Trip.Description,
+                    StartDate = vm.Trip.StartDate,
+                    EndDate = vm.Trip.EndDate,
+                    Price = vm.Trip.Price,
+                    Capacity = vm.Trip.Capacity,
+                    ImageUrl = vm.Trip.ImageUrl,
+                    DestinationId = vm.Trip.DestinationId
+                };
+
+                var result = await _tripService.UpdateTripAsync(vm.Trip.Id, tripModel);
+
+                if (result != null)
+                {
+                    TempData["SuccessMessage"] = "Trip updated successfully!";
+                    return RedirectToAction("Details", new { id = vm.Trip.Id });
+                }
+
+                ModelState.AddModelError("", "Failed to update trip. Please try again.");
+                await LoadDestinationsForEdit(vm);
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating trip: {Id}", vm.Trip.Id);
+                ModelState.AddModelError("", "An error occurred while updating the trip. Please try again.");
+                await LoadDestinationsForEdit(vm);
+                return View(vm);
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Book(int id)
+        {
+            var vm = new TripBookViewModel { TripId = id };
+
+            try
+            {
+                var trip = await _tripService.GetTripByIdAsync(id);
+                if (trip == null) return NotFound();
+
+                if (trip.CurrentBookings >= trip.Capacity)
+                {
+                    vm.ErrorMessage = "This trip is fully booked. Please select another trip.";
+                    return View(vm);
+                }
+
+                vm.Trip = trip;
+
+                if (trip.DestinationId > 0 && string.IsNullOrEmpty(trip.DestinationName))
+                {
+                    var destination = await _destinationService.GetDestinationByIdAsync(trip.DestinationId);
+                    if (destination != null)
+                    {
+                        trip.DestinationName = destination.Name;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading booking page for trip: {TripId}", id);
+                TempData["ErrorMessage"] = "An error occurred while loading the booking page. Please try again.";
+                return RedirectToAction("Index");
+            }
+
+            return View(vm);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Book(TripBookViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                var trip = await _tripService.GetTripByIdAsync(vm.TripId);
+                if (trip != null) vm.Trip = trip;
+                return View(vm);
+            }
+
+            try
+            {
+                var result = await _tripService.BookTripAsync(vm.TripId, vm.NumberOfParticipants);
+
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Your trip has been booked successfully!";
+                    return RedirectToAction("MyBookings");
+                }
+
+                vm.ErrorMessage = "Failed to book the trip. Please try again.";
+                var tripData = await _tripService.GetTripByIdAsync(vm.TripId);
+                if (tripData != null) vm.Trip = tripData;
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error booking trip: {TripId}", vm.TripId);
+                vm.ErrorMessage = $"An error occurred while booking the trip: {ex.Message}";
+                var tripData = await _tripService.GetTripByIdAsync(vm.TripId);
+                if (tripData != null) vm.Trip = tripData;
+                return View(vm);
+            }
+        }
+
+        [Authorize]
+        public async Task<IActionResult> MyBookings()
+        {
+            var vm = new MyBookingsViewModel();
+
+            try
+            {
+                vm.Bookings = await _tripService.GetUserTripsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading user's bookings");
+                vm.ErrorMessage = "An error occurred while loading your bookings. Please try again later.";
+            }
+
+            return View(vm);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            try
+            {
+                var result = await _tripService.CancelBookingAsync(id);
+
+                if (result)
+                {
+                    TempData["SuccessMessage"] = "Your booking has been successfully cancelled.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Failed to cancel your booking. Please try again later.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error cancelling booking {BookingId}", id);
+                TempData["ErrorMessage"] = "An error occurred while cancelling your booking. Please try again later.";
+            }
+
+            return RedirectToAction("MyBookings");
+        }
+
+        private async Task LoadDestinationsForCreate(CreateTripViewModel vm)
         {
             try
             {
                 var destinations = await _destinationService.GetAllDestinationsAsync();
-                return Ok(destinations);
+                vm.Destinations = destinations
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.Id.ToString(),
+                        Text = $"{d.Name} - {d.City}, {d.Country}"
+                    })
+                    .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading destinations for filter");
-                return StatusCode(500, new { message = "Error loading destinations" });
+                _logger.LogError(ex, "Error loading destinations");
+                vm.Destinations = new List<SelectListItem>();
+            }
+        }
+
+        private async Task LoadDestinationsForEdit(EditTripViewModel vm)
+        {
+            try
+            {
+                var destinations = await _destinationService.GetAllDestinationsAsync();
+                vm.Destinations = destinations
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.Id.ToString(),
+                        Text = $"{d.Name} - {d.City}, {d.Country}"
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading destinations");
+                vm.Destinations = new List<SelectListItem>();
             }
         }
     }
-} 
+}
