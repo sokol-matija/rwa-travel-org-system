@@ -675,7 +675,7 @@ namespace WebApp.Services
                     StartDate = trip.StartDate,
                     EndDate = trip.EndDate,
                     Price = trip.Price,
-                    ImageUrl = trip.ImageUrl ?? string.Empty,
+                    ImageUrl = trip.ImageUrl,  // Nullable - will be null if not provided
                     MaxParticipants = trip.Capacity,  // API expects "MaxParticipants" but WebApp uses "Capacity"
                     DestinationId = trip.DestinationId,
                     GuideIds = new List<int>()  // Empty list - guides will be assigned later via guide assignment page
@@ -685,7 +685,13 @@ namespace WebApp.Services
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 
                 _logger.LogInformation("Creating trip with data: {Data}", json);
-                
+
+                // Log whether auth header is set
+                var hasAuth = _httpClient.DefaultRequestHeaders.Authorization != null;
+                _logger.LogInformation("Auth header present: {HasAuth}, Scheme: {Scheme}",
+                    hasAuth,
+                    _httpClient.DefaultRequestHeaders.Authorization?.Scheme ?? "none");
+
                 var response = await _httpClient.PostAsync($"{_apiBaseUrl}Trip", content);
                 
                 if (response.IsSuccessStatusCode)
@@ -714,7 +720,8 @@ namespace WebApp.Services
                 
                 // Handle errors - log the response content for debugging
                 var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogWarning("Failed to create trip: {StatusCode}, Error: {Error}", response.StatusCode, errorContent);
+                _logger.LogError("TRIP CREATE FAILED - StatusCode: {StatusCode}, Response: {Error}",
+                    (int)response.StatusCode, errorContent);
                 return null;
             }
             catch (Exception ex)
