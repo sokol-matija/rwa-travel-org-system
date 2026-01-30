@@ -13,7 +13,7 @@ namespace WebAPI.DTOs
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Price { get; set; }
-        public string ImageUrl { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
         public int MaxParticipants { get; set; }
         public int DestinationId { get; set; }
         public string DestinationName { get; set; } = string.Empty;
@@ -45,7 +45,7 @@ namespace WebAPI.DTOs
 
         [StringLength(500)]
         [Url]
-        public string ImageUrl { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "MaxParticipants must be greater than 0")]
@@ -81,7 +81,7 @@ namespace WebAPI.DTOs
 
         [StringLength(500)]
         [Url]
-        public string ImageUrl { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "MaxParticipants must be greater than 0")]

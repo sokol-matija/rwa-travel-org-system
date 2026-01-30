@@ -28,6 +28,12 @@
                                 {
                                     <img src="@Model.Trip.ImageUrl" class="img-fluid rounded" alt="@Model.Trip.Title">
                                 }
+                                else
+                                {
+                                    <div class="d-flex justify-content-center align-items-center rounded" style="height: 200px; background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(46, 204, 113, 0.2));">
+                                        <i class="fas fa-plane-departure fa-3x" style="color: #3498db; opacity: 0.7;"></i>
+                                    </div>
+                                }
                             </div>
                             <div class="col-md-8">
                                 <h5 class="fw-bold" style="color: #3498db;">@Model.Trip.Title</h5>

@@ -150,6 +150,17 @@ namespace WebApp.Controllers
 
             try
             {
+                // If no image provided, use the destination's image
+                var imageUrl = vm.Trip.ImageUrl;
+                if (string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    var destination = await _destinationService.GetDestinationByIdAsync(vm.Trip.DestinationId);
+                    if (destination != null)
+                    {
+                        imageUrl = destination.ImageUrl;
+                    }
+                }
+
                 var trip = new TripModel
                 {
                     Title = vm.Trip.Title,
@@ -158,7 +169,7 @@ namespace WebApp.Controllers
                     EndDate = vm.Trip.EndDate,
                     Price = vm.Trip.Price,
                     Capacity = vm.Trip.Capacity,
-                    ImageUrl = vm.Trip.ImageUrl,
+                    ImageUrl = imageUrl,
                     DestinationId = vm.Trip.DestinationId
                 };
 
@@ -176,7 +187,7 @@ namespace WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating trip: {Title}", vm.Trip.Title);
-                ModelState.AddModelError("", "An error occurred while creating the trip. Please try again.");
+                ModelState.AddModelError("", $"An error occurred while creating the trip: {ex.Message}");
                 await LoadDestinationsForCreate(vm);
                 return View(vm);
             }
@@ -244,6 +255,17 @@ namespace WebApp.Controllers
 
             try
             {
+                // If no image provided, use the destination's image
+                var imageUrl = vm.Trip.ImageUrl;
+                if (string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    var destination = await _destinationService.GetDestinationByIdAsync(vm.Trip.DestinationId);
+                    if (destination != null)
+                    {
+                        imageUrl = destination.ImageUrl;
+                    }
+                }
+
                 var tripModel = new TripModel
                 {
                     Id = vm.Trip.Id,
@@ -253,7 +275,7 @@ namespace WebApp.Controllers
                     EndDate = vm.Trip.EndDate,
                     Price = vm.Trip.Price,
                     Capacity = vm.Trip.Capacity,
-                    ImageUrl = vm.Trip.ImageUrl,
+                    ImageUrl = imageUrl,
                     DestinationId = vm.Trip.DestinationId
                 };
 

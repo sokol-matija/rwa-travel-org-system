@@ -24,6 +24,7 @@ namespace WebAPI.Services
                 .Include(t => t.Destination)
                 .Include(t => t.TripGuides)
                     .ThenInclude(tg => tg.Guide)
+                .OrderByDescending(t => t.Id)
                 .ToListAsync();
         }
 
@@ -43,6 +44,7 @@ namespace WebAPI.Services
                 .Include(t => t.Destination)
                 .Include(t => t.TripGuides)
                     .ThenInclude(tg => tg.Guide)
+                .OrderByDescending(t => t.Id)
                 .ToListAsync();
         }
 
@@ -71,8 +73,9 @@ namespace WebAPI.Services
                 query = query.Where(t => t.Description != null && t.Description.Contains(description));
             }
 
-            // Apply pagination
+            // Apply sorting and pagination (newest trips first)
             var results = await query
+                .OrderByDescending(t => t.Id)
                 .Skip((page - 1) * count)
                 .Take(count)
                 .ToListAsync();
