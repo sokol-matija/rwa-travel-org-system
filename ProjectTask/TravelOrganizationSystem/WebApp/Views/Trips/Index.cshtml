@@ -40,7 +40,9 @@
     }
 </style>
 
-<div class="container mt-4 trips-page">
+<div class="container mt-4 trips-page"
+     data-user-authenticated="@(User.Identity?.IsAuthenticated == true ? "true" : "false")"
+     data-user-admin="@(User.IsInRole("Admin") ? "true" : "false")">
     <div class="text-center mb-5">
         <h1 class="dark-theme-section-title">
             <i class="fas fa-suitcase-rolling me-3"></i>@ViewData["Title"]
@@ -123,7 +125,7 @@
     <!-- Trip Listings -->
     @if (Model.Trips != null && Model.Trips.Any())
     {
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4" id="tripContainer">
             @if (User.IsInRole("Admin"))
             {
                 <div class="col">
@@ -347,6 +349,7 @@
 }
 
 @section Scripts {
+    <script src="~/js/tripList.js"></script>
     <script>
         function navigateToTripDetails(tripId) {
             window.location.href = '/Trips/Details/' + tripId;

@@ -130,7 +130,7 @@ async function loadTripsWithAjax() {
 
 // Update the trip list content
 function updateTripList(trips) {
-    const tripContainer = document.querySelector('.row.row-cols-1.row-cols-md-3.g-4');
+    const tripContainer = document.getElementById('tripContainer');
     if (!tripContainer) {
         console.error('Trip container not found');
         return;
@@ -211,8 +211,9 @@ function createTripCard(trip) {
         </div>`;
     
     // Create action buttons
-    const isAuthenticated = document.body.getAttribute('data-user-authenticated') === 'true';
-    const isAdmin = document.body.getAttribute('data-user-admin') === 'true';
+    const container = document.querySelector('.trips-page');
+    const isAuthenticated = container?.getAttribute('data-user-authenticated') === 'true';
+    const isAdmin = container?.getAttribute('data-user-admin') === 'true';
     
         const tripId = trip.id || trip.Id;
     let actionButtons = `
@@ -453,7 +454,7 @@ function hideLoadingIndicator() {
 
 // Show no trips message
 function showNoTripsMessage() {
-    const container = document.querySelector('.row.row-cols-1.row-cols-md-3.g-4');
+    const container = document.getElementById('tripContainer');
     if (!container) return;
     
     const messageDiv = document.createElement('div');
