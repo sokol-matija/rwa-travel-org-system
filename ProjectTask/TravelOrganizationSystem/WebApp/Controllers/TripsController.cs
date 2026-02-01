@@ -342,6 +342,7 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Book(TripBookViewModel vm)
         {
+            ModelState.Remove("Trip");
             if (!ModelState.IsValid)
             {
                 var trip = await _tripService.GetTripByIdAsync(vm.TripId);

@@ -27,7 +27,7 @@ namespace WebApp.ViewModels
 
     public class TripBookViewModel
     {
-        public TripModel Trip { get; set; } = default!;
+        public TripModel? Trip { get; set; }
         public string? ErrorMessage { get; set; }
         public int TripId { get; set; }
 

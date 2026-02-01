@@ -52,9 +52,11 @@
                             </div>
                         </div>
 
-                        <form method="post" asp-controller="Trips" asp-action="Book" class="dark-theme-form">
+                        <div id="bookingError" class="alert alert-danger d-none" role="alert"></div>
+                        <div id="bookingSuccess" class="alert alert-success d-none" role="alert"></div>
+
+                        <form id="bookingForm" class="dark-theme-form">
                             <input type="hidden" asp-for="TripId" />
-                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                             <div class="mb-4">
                                 <label asp-for="NumberOfParticipants" class="form-label fw-medium" style="color: #ecf0f1;">
@@ -66,11 +68,10 @@
                                         <option value="@i">@i</option>
                                     }
                                 </select>
-                                <span asp-validation-for="NumberOfParticipants" class="text-danger"></span>
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex">
-                                <button type="submit" class="btn btn-success btn-lg flex-fill">
+                                <button type="button" id="confirmBookingBtn" class="btn btn-success btn-lg flex-fill">
                                     <i class="fas fa-check me-2"></i>Confirm Booking
                                 </button>
                                 <a asp-controller="Trips" asp-action="Details" asp-route-id="@Model.TripId" class="btn btn-outline-secondary btn-lg">
@@ -78,6 +79,43 @@
                                 </a>
                             </div>
                         </form>
+
+                        <script>
+                            document.getElementById('confirmBookingBtn').addEventListener('click', async function() {
+                                const btn = this;
+                                btn.disabled = true;
+                                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Booking...';
+
+                                const tripId = document.getElementById('TripId').value;
+                                const participants = document.getElementById('NumberOfParticipants').value;
+                                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+                                try {
+                                    const response = await fetch('/Trips/Book/' + tripId, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                        credentials: 'include',
+                                        body: 'TripId=' + tripId + '&NumberOfParticipants=' + participants + '&__RequestVerificationToken=' + encodeURIComponent(token)
+                                    });
+
+                                    if (response.redirected) {
+                                        window.location.href = response.url;
+                                        return;
+                                    }
+
+                                    // Non-redirect 200 means the controller returned the form back (booking failed)
+                                    document.getElementById('bookingError').textContent = 'Failed to book the trip. Please try again.';
+                                    document.getElementById('bookingError').classList.remove('d-none');
+                                    btn.disabled = false;
+                                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Confirm Booking';
+                                } catch (err) {
+                                    document.getElementById('bookingError').textContent = 'An error occurred: ' + err.message;
+                                    document.getElementById('bookingError').classList.remove('d-none');
+                                    btn.disabled = false;
+                                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Confirm Booking';
+                                }
+                            });
+                        </script>
                     </div>
                 </div>
             }
@@ -85,6 +123,3 @@
     </div>
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

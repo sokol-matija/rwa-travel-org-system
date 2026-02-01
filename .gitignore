@@ -50,6 +50,7 @@ ProjectTask/Database/data/
 ProjectTask/Database/data-*/
 ProjectTask/Database/.env
 
+
 # Logs
 logs/
 *.log
@@ -140,3 +141,7 @@ _ReSharper*/
 local.settings.json
 
 ProjectTask/TravelOrganizationSystem/.serena/
+
+ProjectTask 2/Database/
+
+RWA-Projekt-2025-hr.pdf
