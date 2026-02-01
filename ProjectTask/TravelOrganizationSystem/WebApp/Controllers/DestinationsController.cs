@@ -26,19 +26,19 @@ namespace WebApp.Controllers
         }
 
         /// <summary>
-        /// Display all destinations
+        /// Display all destinations with pagination
         /// </summary>
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var vm = new DestinationIndexViewModel();
+            var vm = new DestinationIndexViewModel { Page = page };
 
             try
             {
-                vm.Destinations = await _destinationService.GetAllDestinationsAsync();
+                var allDestinations = await _destinationService.GetAllDestinationsAsync();
 
                 // Get images for destinations that don't have one
-                foreach (var destination in vm.Destinations.Where(d => string.IsNullOrEmpty(d.ImageUrl)))
+                foreach (var destination in allDestinations.Where(d => string.IsNullOrEmpty(d.ImageUrl)))
                 {
                     var imageUrl = await _unsplashService.GetRandomImageUrlAsync($"{destination.City} {destination.Country}");
                     if (!string.IsNullOrEmpty(imageUrl))
@@ -46,6 +46,14 @@ namespace WebApp.Controllers
                         destination.ImageUrl = imageUrl;
                     }
                 }
+
+                // Apply pagination
+                vm.TotalDestinations = allDestinations.Count;
+                vm.TotalPages = (int)Math.Ceiling((double)allDestinations.Count / vm.PageSize);
+                vm.Destinations = allDestinations
+                    .Skip((page - 1) * vm.PageSize)
+                    .Take(vm.PageSize)
+                    .ToList();
             }
             catch (Exception ex)
             {

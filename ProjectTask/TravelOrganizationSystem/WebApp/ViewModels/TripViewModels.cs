@@ -10,7 +10,7 @@ namespace WebApp.ViewModels
         public SelectList Destinations { get; set; } = default!;
         public int? DestinationId { get; set; }
         public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 20;
+        public int PageSize { get; set; } = 6;
         public int TotalTrips { get; set; }
         public int TotalPages { get; set; }
         public bool HasPreviousPage => Page > 1;

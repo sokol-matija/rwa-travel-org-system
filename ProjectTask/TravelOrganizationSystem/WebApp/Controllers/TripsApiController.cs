@@ -37,7 +37,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTrips(
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
+            [FromQuery] int pageSize = 6,
             [FromQuery] int? destinationId = null)
         {
             try
@@ -47,7 +47,7 @@ namespace WebApp.Controllers
 
                 // Validate parameters
                 if (page < 1) page = 1;
-                if (pageSize < 1 || pageSize > 50) pageSize = 10;
+                if (pageSize < 1 || pageSize > 50) pageSize = 6;
 
                 // Get trips with pagination
                 var (trips, totalCount) = await _tripService.GetTripsAsync(page, pageSize, destinationId);

@@ -3,7 +3,7 @@
 
 let currentPage = 1;
 let currentDestinationId = null;
-let pageSize = 10;
+let pageSize = 6;
 let isLoading = false;
 
 // Initialize when DOM is ready

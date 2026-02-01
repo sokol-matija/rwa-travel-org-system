@@ -9,6 +9,12 @@ namespace WebApp.ViewModels
     public class DestinationIndexViewModel
     {
         public List<DestinationModel> Destinations { get; set; } = new List<DestinationModel>();
+        public int Page { get; set; } = 1;
+        public int PageSize { get; set; } = 6;
+        public int TotalDestinations { get; set; }
+        public int TotalPages { get; set; }
+        public bool HasPreviousPage => Page > 1;
+        public bool HasNextPage => Page < TotalPages;
         public string? ErrorMessage { get; set; }
     }
 
