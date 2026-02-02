@@ -16,7 +16,7 @@ concurrency:
 jobs:
   sonarqube:
     name: SonarQube Scan
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -28,7 +28,9 @@ jobs:
       - name: Connect to Tailscale
         uses: tailscale/github-action@4e4c49acaa9818630ce0bd7a564372c17e33fb4d # v2.0.3
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
 
       - name: Setup .NET
         uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.1.0
@@ -54,10 +56,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
-          dotnet sonarscanner begin `
-            /k:"TravelOrganizationSystem" `
-            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+          dotnet sonarscanner begin \
+            /k:"TravelOrganizationSystem" \
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.qualitygate.wait=false
 
       - name: Build solution
@@ -68,10 +70,10 @@ jobs:
       # - name: Run tests with coverage
       #   working-directory: ProjectTask/TravelOrganizationSystem
       #   run: |
-      #     dotnet test --no-build --configuration Release `
-      #       --collect:"XPlat Code Coverage" `
-      #       --results-directory ./coverage `
-      #       --logger "trx;LogFileName=test-results.trx" `
+      #     dotnet test --no-build --configuration Release \
+      #       --collect:"XPlat Code Coverage" \
+      #       --results-directory ./coverage \
+      #       --logger "trx;LogFileName=test-results.trx" \
       #       -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: End SonarQube Analysis
