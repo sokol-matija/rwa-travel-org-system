@@ -150,4 +150,5 @@ ProjectTask/TravelOrganizationSystem/scripts/
 
 *.md
 
-ProjectTask/TravelOrganizationSystem/.sonarqube/conf/0/ProjectOutFolderPath.txt
+# SonarQube analysis output
+ProjectTask/TravelOrganizationSystem/.sonarqube/
