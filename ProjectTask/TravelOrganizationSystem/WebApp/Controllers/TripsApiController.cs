@@ -42,7 +42,7 @@ namespace WebApp.Controllers
         {
             try
             {
-                _logger.LogInformation("AJAX request for trips - Page: {Page}, PageSize: {PageSize}, DestinationId: {DestinationId}", 
+                _logger.LogInformation("AJAX request for trips - Page: {Page}, PageSize: {PageSize}, DestinationId: {DestinationId}",
                     page, pageSize, destinationId);
 
                 // Validate parameters
@@ -103,4 +103,4 @@ namespace WebApp.Controllers
             }
         }
     }
-} 
+}

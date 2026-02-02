@@ -11,4 +11,4 @@ namespace WebAPI.Models
         [StringLength(500)]
         public string ImageUrl { get; set; } = string.Empty;
     }
-} 
+}

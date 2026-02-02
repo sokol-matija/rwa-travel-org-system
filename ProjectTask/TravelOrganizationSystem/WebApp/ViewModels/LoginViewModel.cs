@@ -21,4 +21,4 @@ namespace WebApp.ViewModels
         // Return URL for redirect after login
         public string? ReturnUrl { get; set; }
     }
-} 
+}

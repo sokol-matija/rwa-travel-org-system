@@ -1,11 +1,11 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using WebAPI.DTOs;
 using WebAPI.Models;
 using WebAPI.Services;
-using WebAPI.DTOs;
-using System.Linq;
 
 namespace WebAPI.Controllers
 {
@@ -82,7 +82,7 @@ namespace WebAPI.Controllers
             };
 
             var createdDestination = await _destinationService.CreateDestinationAsync(destination);
-            return CreatedAtAction(nameof(GetDestination), new { id = createdDestination.Id }, 
+            return CreatedAtAction(nameof(GetDestination), new { id = createdDestination.Id },
                 MapDestinationToDto(createdDestination));
         }
 
@@ -165,7 +165,7 @@ namespace WebAPI.Controllers
 
             // Update the image URL
             destination.ImageUrl = model.ImageUrl;
-            
+
             // Save the changes
             var result = await _destinationService.UpdateDestinationAsync(id, destination);
             if (result == null)
@@ -192,6 +192,6 @@ namespace WebAPI.Controllers
     // DTO for updating destination image
     public class UpdateDestinationImageDTO
     {
-        public string ImageUrl { get; set; }
+        public string? ImageUrl { get; set; }
     }
-} 
+}

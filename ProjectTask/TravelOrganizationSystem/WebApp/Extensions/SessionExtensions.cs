@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Http
         public static T? GetObject<T>(this ISession session, string key)
         {
             string? json = session.GetString(key);
-            
+
             if (string.IsNullOrEmpty(json))
             {
                 return default;
@@ -42,4 +42,4 @@ namespace Microsoft.AspNetCore.Http
             return JsonSerializer.Deserialize<T>(json);
         }
     }
-} 
+}

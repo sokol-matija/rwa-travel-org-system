@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using WebApp.Models;
 using WebApp.ViewModels;
 
@@ -47,18 +47,18 @@ namespace WebApp.Services
 
                 // Make the API request
                 var response = await _httpClient.PostAsync($"{_apiBaseUrl}auth/login", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponseModel>();
-                    
+
                     if (tokenResponse != null)
                     {
                         // Store the token in session
                         _httpContextAccessor.HttpContext?.Session.SetString("Token", tokenResponse.Token);
                         _httpContextAccessor.HttpContext?.Session.SetString("Username", tokenResponse.Username);
                         _httpContextAccessor.HttpContext?.Session.SetString("IsAdmin", tokenResponse.IsAdmin.ToString());
-                        
+
                         // Create claims identity
                         var claims = new List<Claim>
                         {
@@ -95,7 +95,7 @@ namespace WebApp.Services
                             CookieAuthenticationDefaults.AuthenticationScheme,
                             new ClaimsPrincipal(claimsIdentity),
                             authProperties);
-                        
+
                         _logger.LogInformation("User {Username} logged in successfully", loginModel.Username);
                         return true;
                     }
@@ -103,10 +103,10 @@ namespace WebApp.Services
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Failed login attempt for username: {Username}. Error: {Error}", 
+                    _logger.LogWarning("Failed login attempt for username: {Username}. Error: {Error}",
                         loginModel.Username, errorContent);
                 }
-                
+
                 return false;
             }
             catch (Exception ex)
@@ -142,7 +142,7 @@ namespace WebApp.Services
 
                 // Make the API request
                 var response = await _httpClient.PostAsync($"{_apiBaseUrl}auth/register", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("User {Username} registered successfully", registerModel.Username);
@@ -151,7 +151,7 @@ namespace WebApp.Services
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Failed registration attempt for username: {Username}. Error: {Error}", 
+                    _logger.LogWarning("Failed registration attempt for username: {Username}. Error: {Error}",
                         registerModel.Username, errorContent);
                     return false;
                 }
@@ -174,11 +174,11 @@ namespace WebApp.Services
                 _httpContextAccessor.HttpContext?.Session.Remove("Token");
                 _httpContextAccessor.HttpContext?.Session.Remove("Username");
                 _httpContextAccessor.HttpContext?.Session.Remove("IsAdmin");
-                
+
                 // Sign out from cookie authentication
                 await _httpContextAccessor.HttpContext!.SignOutAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme);
-                
+
                 _logger.LogInformation("User logged out");
             }
             catch (Exception ex)
@@ -196,40 +196,40 @@ namespace WebApp.Services
             {
                 // Get token from session
                 var token = _httpContextAccessor.HttpContext?.Session.GetString("Token");
-                
+
                 if (string.IsNullOrEmpty(token))
                 {
                     _logger.LogWarning("GetCurrentUserAsync failed: No token found in session");
                     return null;
                 }
-                
+
                 // Clear any existing headers
                 _httpClient.DefaultRequestHeaders.Authorization = null;
-                
+
                 // Set the authorization header exactly as in the curl example
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                
+
                 // Log the API request with full details for debugging
-                _logger.LogInformation("Getting current user profile from {ApiUrl} with token: {TokenPreview}...", 
-                    $"{_apiBaseUrl}User/current", 
+                _logger.LogInformation("Getting current user profile from {ApiUrl} with token: {TokenPreview}...",
+                    $"{_apiBaseUrl}User/current",
                     token.Substring(0, Math.Min(20, token.Length)) + "...");
-                
+
                 // Make the API request to get the current user
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}User/current");
-                
+
                 // Log full details of the response
                 var responseContent = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("API response: Status={StatusCode}, Content={Content}", 
-                    response.StatusCode, 
+                _logger.LogInformation("API response: Status={StatusCode}, Content={Content}",
+                    response.StatusCode,
                     responseContent);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var user = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions 
-                    { 
-                        PropertyNameCaseInsensitive = true 
+                    var user = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
                     });
-                    
+
                     if (user != null)
                     {
                         _logger.LogInformation("Successfully retrieved user: {Username}", user.Username);
@@ -270,7 +270,7 @@ namespace WebApp.Services
         {
             return _httpContextAccessor.HttpContext?.User.IsInRole("Admin") ?? false;
         }
-        
+
         /// <summary>
         /// Changes the password for the currently authenticated user
         /// </summary>
@@ -284,19 +284,19 @@ namespace WebApp.Services
                     _logger.LogWarning("Password change failed: New password and confirmation do not match");
                     return false;
                 }
-                
+
                 // Get the token from session
                 var token = _httpContextAccessor.HttpContext?.Session.GetString("Token");
-                
+
                 if (string.IsNullOrEmpty(token))
                 {
                     _logger.LogWarning("Password change failed: User not authenticated");
                     return false;
                 }
-                
+
                 // Set the authorization header
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                
+
                 // Create the DTO for the API
                 var changePasswordDto = new ChangePasswordDTO
                 {
@@ -304,13 +304,13 @@ namespace WebApp.Services
                     NewPassword = newPassword,
                     ConfirmNewPassword = confirmPassword
                 };
-                
+
                 // Log the API request for debugging
                 _logger.LogInformation("Sending password change request to {ApiUrl}", $"{_apiBaseUrl}Auth/changepassword");
-                
+
                 // Make the API request to change password
                 var response = await _httpClient.PostAsJsonAsync($"{_apiBaseUrl}Auth/changepassword", changePasswordDto);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Password changed successfully");
@@ -320,7 +320,7 @@ namespace WebApp.Services
                 {
                     // Read error message from response
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Password change failed: API returned {StatusCode} with message: {ErrorMessage}", 
+                    _logger.LogWarning("Password change failed: API returned {StatusCode} with message: {ErrorMessage}",
                         response.StatusCode, errorContent);
                     return false;
                 }
@@ -332,4 +332,4 @@ namespace WebApp.Services
             }
         }
     }
-} 
+}

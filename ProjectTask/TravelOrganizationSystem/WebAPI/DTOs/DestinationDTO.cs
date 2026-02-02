@@ -30,7 +30,7 @@ namespace WebAPI.DTOs
         [Required]
         [StringLength(100)]
         public string City { get; set; } = string.Empty;
-        
+
         [StringLength(500)]
         public string? ImageUrl { get; set; }
     }
@@ -54,8 +54,8 @@ namespace WebAPI.DTOs
         [Required]
         [StringLength(100)]
         public string City { get; set; } = string.Empty;
-        
+
         [StringLength(500)]
         public string? ImageUrl { get; set; }
     }
-} 
+}

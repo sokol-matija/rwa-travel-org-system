@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using WebApp.Models;
 
 namespace WebApp.Services
@@ -49,11 +49,11 @@ namespace WebApp.Services
         {
             // Clear any existing Authorization headers
             _httpClient.DefaultRequestHeaders.Authorization = null;
-            
+
             // Get the current HTTP context
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext == null) return;
-            
+
             // First try to get token from session
             var sessionToken = httpContext.Session.GetString("Token");
             if (!string.IsNullOrEmpty(sessionToken))
@@ -62,7 +62,7 @@ namespace WebApp.Services
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessionToken);
                 return;
             }
-            
+
             // If no session token, try from authentication cookie
             if (httpContext.User.Identity?.IsAuthenticated == true)
             {
@@ -75,7 +75,7 @@ namespace WebApp.Services
                     return;
                 }
             }
-            
+
             _logger.LogWarning("No authentication token found for logs API request");
         }
 
@@ -87,25 +87,25 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Fetching {Count} logs from API", count);
-                
+
                 // Set authentication token
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}Logs/get/{count}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogDebug("API Response for logs: {Content}", content);
-                    
+
                     var logs = await ParseLogsFromJsonAsync(content);
-                    
+
                     _logger.LogInformation("Successfully fetched {Count} logs from API", logs.Count);
                     return logs;
                 }
                 else
                 {
-                    _logger.LogError("Failed to fetch logs from API. Status: {StatusCode}, Content: {Content}", 
+                    _logger.LogError("Failed to fetch logs from API. Status: {StatusCode}, Content: {Content}",
                         response.StatusCode, await response.Content.ReadAsStringAsync());
                     throw new HttpRequestException($"API request failed with status {response.StatusCode}");
                 }
@@ -125,26 +125,26 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Fetching logs count from API");
-                
+
                 // Set authentication token
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}Logs/count");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogDebug("API Response for logs count: {Content}", content);
-                    
+
                     var countResponse = JsonSerializer.Deserialize<JsonElement>(content, _jsonOptions);
                     var count = countResponse.GetProperty("count").GetInt32();
-                    
+
                     _logger.LogInformation("Successfully fetched logs count from API: {Count}", count);
                     return count;
                 }
                 else
                 {
-                    _logger.LogError("Failed to fetch logs count from API. Status: {StatusCode}, Content: {Content}", 
+                    _logger.LogError("Failed to fetch logs count from API. Status: {StatusCode}, Content: {Content}",
                         response.StatusCode, await response.Content.ReadAsStringAsync());
                     throw new HttpRequestException($"API request failed with status {response.StatusCode}");
                 }
@@ -167,26 +167,26 @@ namespace WebApp.Services
 
                 // Get total count first
                 var totalCount = await GetLogsCountAsync();
-                
+
                 // Calculate how many logs to get for this page
                 var skip = (page - 1) * pageSize;
                 var logsToGet = Math.Min(pageSize, totalCount - skip);
-                
+
                 if (logsToGet <= 0)
                 {
                     return (new List<LogModel>(), totalCount);
                 }
-                
+
                 // For pagination, we need to get more logs than needed and then skip to the right page
                 // Since the API only supports getting the most recent N logs, we need to get enough logs
                 // to cover all previous pages plus the current page
                 var totalLogsNeeded = skip + pageSize;
                 var allLogs = await GetLogsAsync(Math.Min(totalLogsNeeded, totalCount));
-                
+
                 // Apply pagination to the results
                 var paginatedLogs = allLogs.Skip(skip).Take(pageSize).ToList();
-                
-                _logger.LogInformation("Returning {Count} logs out of {Total} for page {Page}", 
+
+                _logger.LogInformation("Returning {Count} logs out of {Total} for page {Page}",
                     paginatedLogs.Count, totalCount, page);
 
                 return (paginatedLogs, totalCount);
@@ -204,11 +204,11 @@ namespace WebApp.Services
         private async Task<List<LogModel>> ParseLogsFromJsonAsync(string jsonContent)
         {
             var logs = new List<LogModel>();
-            
+
             try
             {
                 var jsonDoc = JsonDocument.Parse(jsonContent);
-                
+
                 // Handle different response formats ($values array or direct array)
                 JsonElement logsArray;
                 if (jsonDoc.RootElement.TryGetProperty("$values", out var valuesElement))
@@ -224,7 +224,7 @@ namespace WebApp.Services
                     _logger.LogWarning("Unexpected JSON structure in ParseLogsFromJsonAsync");
                     return logs;
                 }
-                
+
                 // Process each log in the array
                 foreach (var logElement in logsArray.EnumerateArray())
                 {
@@ -235,14 +235,14 @@ namespace WebApp.Services
                         Level = GetStringProperty(logElement, "level") ?? "Info",
                         Message = GetStringProperty(logElement, "message") ?? string.Empty
                     };
-                    
+
                     logs.Add(log);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error parsing logs JSON");
-                
+
                 // Fallback to direct deserialization
                 try
                 {
@@ -254,7 +254,7 @@ namespace WebApp.Services
                     throw;
                 }
             }
-            
+
             return logs;
         }
 
@@ -294,4 +294,4 @@ namespace WebApp.Services
             return defaultValue ?? DateTime.MinValue;
         }
     }
-} 
+}

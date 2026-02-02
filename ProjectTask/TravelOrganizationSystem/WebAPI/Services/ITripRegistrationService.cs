@@ -15,4 +15,4 @@ namespace WebAPI.Services
         Task<bool> DeleteRegistrationAsync(int id);
         Task<bool> UpdateRegistrationStatusAsync(int id, string status);
     }
-} 
+}

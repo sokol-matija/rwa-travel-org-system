@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
-using WebApp.Services;
 using WebApp.Models;
+using WebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,7 +68,7 @@ builder.Services.Configure<UnsplashSettings>(
     builder.Configuration.GetSection("UnsplashSettings"));
 
 // Register UnsplashSettings as a singleton
-builder.Services.AddSingleton(sp => 
+builder.Services.AddSingleton(sp =>
     sp.GetRequiredService<IOptions<UnsplashSettings>>().Value);
 
 var app = builder.Build();

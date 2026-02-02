@@ -29,7 +29,7 @@ namespace WebApp.Services
             _settings = settings.Value;
             _logger = logger;
 
-            _httpClient.DefaultRequestHeaders.Authorization = 
+            _httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Client-ID", _settings.AccessKey);
             _httpClient.DefaultRequestHeaders.Add("Accept-Version", "v1");
             _httpClient.BaseAddress = new Uri("https://api.unsplash.com/");
@@ -38,7 +38,7 @@ namespace WebApp.Services
         public async Task<string?> GetRandomImageUrlAsync(string query)
         {
             var cacheKey = $"unsplash_random_{query}";
-            
+
             // Try to get from cache first
             if (_cache.TryGetValue(cacheKey, out string? cachedUrl))
             {
@@ -77,7 +77,7 @@ namespace WebApp.Services
         public async Task<string?> GetImageUrlAsync(string photoId)
         {
             var cacheKey = $"unsplash_photo_{photoId}";
-            
+
             // Try to get from cache first
             if (_cache.TryGetValue(cacheKey, out string? cachedUrl))
             {
@@ -141,4 +141,4 @@ namespace WebApp.Services
     {
         public string DownloadLocation { get; set; } = string.Empty;
     }
-} 
+}

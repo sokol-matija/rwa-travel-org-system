@@ -29,4 +29,4 @@ namespace WebApp.Services
         /// <returns>Tuple containing the logs and total count</returns>
         Task<(List<LogModel> logs, int totalCount)> GetLogsAsync(int page = 1, int pageSize = 50);
     }
-} 
+}

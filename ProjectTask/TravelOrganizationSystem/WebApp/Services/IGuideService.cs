@@ -44,4 +44,4 @@ namespace WebApp.Services
         /// <param name="tripId">Trip ID to get guides for</param>
         Task<IEnumerable<GuideModel>> GetGuidesByTripAsync(int tripId);
     }
-} 
+}

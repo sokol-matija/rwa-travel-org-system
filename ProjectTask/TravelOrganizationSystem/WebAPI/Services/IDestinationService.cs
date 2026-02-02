@@ -12,4 +12,4 @@ namespace WebAPI.Services
         Task<Destination> UpdateDestinationAsync(int id, Destination destination);
         Task<bool> DeleteDestinationAsync(int id);
     }
-} 
+}

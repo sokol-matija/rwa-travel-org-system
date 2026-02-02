@@ -91,4 +91,4 @@ namespace WebApp.Models
         [JsonPropertyName("results")]
         public List<UnsplashPhoto> Results { get; set; } = new();
     }
-} 
+}

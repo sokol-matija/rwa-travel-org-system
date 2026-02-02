@@ -24,7 +24,7 @@ namespace WebApp.Services
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:16000/api/";
-            
+
             // Ensure base URL ends with slash
             if (!_apiBaseUrl.EndsWith("/"))
                 _apiBaseUrl += "/";
@@ -37,21 +37,21 @@ namespace WebApp.Services
         {
             // Clear any existing Authorization headers
             _httpClient.DefaultRequestHeaders.Authorization = null;
-            
+
             // Get the current HTTP context
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext == null) return;
-            
+
             // First try to get token from session (like AuthService does)
             var sessionToken = httpContext.Session.GetString("Token");
             if (!string.IsNullOrEmpty(sessionToken))
             {
-                _logger.LogInformation("Using token from session for Guide API request - Token: {TokenPreview}...", 
+                _logger.LogInformation("Using token from session for Guide API request - Token: {TokenPreview}...",
                     sessionToken.Substring(0, Math.Min(20, sessionToken.Length)));
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessionToken);
                 return;
             }
-            
+
             // If no session token, try from authentication cookie
             if (httpContext.User.Identity?.IsAuthenticated == true)
             {
@@ -64,7 +64,7 @@ namespace WebApp.Services
                     return;
                 }
             }
-            
+
             _logger.LogWarning("No authentication token found in session or cookie for Guide API request");
         }
 
@@ -76,25 +76,25 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Fetching all guides from API");
-                
+
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}Guide");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonContent = await response.Content.ReadAsStringAsync();
                     _logger.LogInformation("API Response: {JsonContent}", jsonContent.Substring(0, Math.Min(200, jsonContent.Length)));
-                    
+
                     // Handle the $values wrapper from .NET serialization
                     var apiGuides = DeserializeApiResponse<IEnumerable<ApiGuideModel>>(jsonContent);
 
                     var guides = apiGuides?.Select(MapFromApiModel) ?? Enumerable.Empty<GuideModel>();
-                    
+
                     _logger.LogInformation("Successfully loaded {Count} guides", guides.Count());
                     return guides;
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to fetch guides: {StatusCode} - {ReasonPhrase}", 
+                    _logger.LogWarning("Failed to fetch guides: {StatusCode} - {ReasonPhrase}",
                         response.StatusCode, response.ReasonPhrase);
                     return Enumerable.Empty<GuideModel>();
                 }
@@ -114,9 +114,9 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Fetching guide with ID: {GuideId}", id);
-                
+
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}Guide/{id}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonContent = await response.Content.ReadAsStringAsync();
@@ -135,10 +135,10 @@ namespace WebApp.Services
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to fetch guide {GuideId}: {StatusCode} - {ReasonPhrase}", 
+                    _logger.LogWarning("Failed to fetch guide {GuideId}: {StatusCode} - {ReasonPhrase}",
                         id, response.StatusCode, response.ReasonPhrase);
                 }
-                
+
                 return null;
             }
             catch (Exception ex)
@@ -156,16 +156,16 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Creating new guide: {GuideName}", guide.FullName);
-                
+
                 // Set authentication token for Admin-required operation
                 await SetAuthHeaderAsync();
-                
+
                 var apiGuide = MapToApiModel(guide);
                 var jsonContent = JsonSerializer.Serialize(apiGuide);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PostAsync($"{_apiBaseUrl}Guide", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -181,11 +181,11 @@ namespace WebApp.Services
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Failed to create guide: {StatusCode} - {Error}. Auth header: {AuthHeader}", 
-                        response.StatusCode, errorContent, 
+                    _logger.LogWarning("Failed to create guide: {StatusCode} - {Error}. Auth header: {AuthHeader}",
+                        response.StatusCode, errorContent,
                         _httpClient.DefaultRequestHeaders.Authorization?.ToString() ?? "None");
                 }
-                
+
                 return null;
             }
             catch (Exception ex)
@@ -203,18 +203,18 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Updating guide with ID: {GuideId}", id);
-                
+
                 // Set authentication token for Admin-required operation
                 await SetAuthHeaderAsync();
-                
+
                 var apiGuide = MapToApiModel(guide);
                 apiGuide.Id = id; // Ensure ID is set correctly
-                
+
                 var jsonContent = JsonSerializer.Serialize(apiGuide);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PutAsync($"{_apiBaseUrl}Guide/{id}", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -230,10 +230,10 @@ namespace WebApp.Services
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Failed to update guide {GuideId}: {StatusCode} - {Error}", 
+                    _logger.LogWarning("Failed to update guide {GuideId}: {StatusCode} - {Error}",
                         id, response.StatusCode, errorContent);
                 }
-                
+
                 return null;
             }
             catch (Exception ex)
@@ -251,12 +251,12 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Deleting guide with ID: {GuideId}", id);
-                
+
                 // Set authentication token for Admin-required operation
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}Guide/{id}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Successfully deleted guide with ID: {GuideId}", id);
@@ -265,7 +265,7 @@ namespace WebApp.Services
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Failed to delete guide {GuideId}: {StatusCode} - {Error}", 
+                    _logger.LogWarning("Failed to delete guide {GuideId}: {StatusCode} - {Error}",
                         id, response.StatusCode, errorContent);
                     return false;
                 }
@@ -285,22 +285,22 @@ namespace WebApp.Services
             try
             {
                 _logger.LogInformation("Fetching guides for trip ID: {TripId}", tripId);
-                
+
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}Guide/trip/{tripId}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonContent = await response.Content.ReadAsStringAsync();
                     var apiGuides = DeserializeApiResponse<IEnumerable<ApiGuideModel>>(jsonContent);
 
                     var guides = apiGuides?.Select(MapFromApiModel) ?? Enumerable.Empty<GuideModel>();
-                    
+
                     _logger.LogInformation("Successfully loaded {Count} guides for trip {TripId}", guides.Count(), tripId);
                     return guides;
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to fetch guides for trip {TripId}: {StatusCode} - {ReasonPhrase}", 
+                    _logger.LogWarning("Failed to fetch guides for trip {TripId}: {StatusCode} - {ReasonPhrase}",
                         tripId, response.StatusCode, response.ReasonPhrase);
                     return Enumerable.Empty<GuideModel>();
                 }
@@ -318,7 +318,7 @@ namespace WebApp.Services
         private static GuideModel MapFromApiModel(ApiGuideModel apiGuide)
         {
             var nameParts = SplitName(apiGuide.Name ?? "");
-            
+
             return new GuideModel
             {
                 Id = apiGuide.Id,
@@ -359,7 +359,7 @@ namespace WebApp.Services
                 return ("", "");
 
             var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            
+
             return parts.Length switch
             {
                 0 => ("", ""),
@@ -390,13 +390,13 @@ namespace WebApp.Services
                     // If that fails, try parsing as wrapped response with $values
                     using var document = JsonDocument.Parse(jsonContent);
                     var root = document.RootElement;
-                    
+
                     if (root.TryGetProperty("$values", out var valuesProperty))
                     {
                         var valuesJson = valuesProperty.GetRawText();
                         return JsonSerializer.Deserialize<T>(valuesJson, options);
                     }
-                    
+
                     return default(T);
                 }
                 catch
@@ -420,4 +420,4 @@ namespace WebApp.Services
             public int? YearsOfExperience { get; set; }
         }
     }
-} 
+}

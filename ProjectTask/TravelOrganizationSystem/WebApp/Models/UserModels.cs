@@ -10,4 +10,4 @@ namespace WebApp.Models
         public bool IsAdmin { get; set; }
         public string ExpiresAt { get; set; } = string.Empty;
     }
-} 
+}

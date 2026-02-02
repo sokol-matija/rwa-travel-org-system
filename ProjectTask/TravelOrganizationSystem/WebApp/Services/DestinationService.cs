@@ -3,8 +3,8 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using WebApp.Models;
 using Microsoft.Extensions.Logging;
+using WebApp.Models;
 
 namespace WebApp.Services
 {
@@ -31,21 +31,21 @@ namespace WebApp.Services
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _unsplashService = unsplashService;
-            
+
             // Configure base address from settings
-            _httpClient.BaseAddress = new Uri(configuration["ApiSettings:BaseUrl"] ?? 
+            _httpClient.BaseAddress = new Uri(configuration["ApiSettings:BaseUrl"] ??
                 "http://localhost:16000/api/");
-                
+
             // Set API base URL to empty as BaseAddress already has the api/ prefix
             _apiBaseUrl = "";
-            
+
             // Configure JSON options
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
         }
-        
+
         /// <summary>
         /// Set authentication token for API requests if user is logged in
         /// </summary>
@@ -53,11 +53,11 @@ namespace WebApp.Services
         {
             // Clear any existing Authorization headers
             _httpClient.DefaultRequestHeaders.Authorization = null;
-            
+
             // Get the current HTTP context
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext == null) return;
-            
+
             // Check if user is authenticated
             if (httpContext.User.Identity?.IsAuthenticated == true)
             {
@@ -80,22 +80,23 @@ namespace WebApp.Services
             {
                 _logger.LogInformation("Fetching all destinations from API");
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}Destination");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     // Read response content as string first to handle the reference-preserving format
                     var content = await response.Content.ReadAsStringAsync();
-                    
+
                     // Configure JSON options to handle reference preservation
                     var jsonOptions = new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true,
                         ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
                     };
-                    
+
                     List<DestinationModel> destinations;
-                    
-                    try {
+
+                    try
+                    {
                         // Try to parse directly first
                         destinations = JsonSerializer.Deserialize<List<DestinationModel>>(content, jsonOptions);
                         if (destinations == null)
@@ -128,7 +129,7 @@ namespace WebApp.Services
                             destinations = new List<DestinationModel>();
                         }
                     }
-                    
+
                     // Get Unsplash images for destinations without an image URL and update them
                     foreach (var destination in destinations.Where(d => string.IsNullOrEmpty(d.ImageUrl)))
                     {
@@ -136,7 +137,7 @@ namespace WebApp.Services
                         {
                             var searchQuery = $"{destination.City} {destination.Country} travel";
                             var imageUrl = await _unsplashService.GetRandomImageUrlAsync(searchQuery);
-                            
+
                             if (!string.IsNullOrEmpty(imageUrl))
                             {
                                 destination.ImageUrl = imageUrl;
@@ -146,12 +147,12 @@ namespace WebApp.Services
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Error getting Unsplash image for {City}, {Country}", 
+                            _logger.LogError(ex, "Error getting Unsplash image for {City}, {Country}",
                                 destination.City, destination.Country);
                             // Continue processing other destinations
                         }
                     }
-                    
+
                     return destinations;
                 }
                 else
@@ -196,14 +197,14 @@ namespace WebApp.Services
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogDebug("Destination API response: {Content}", content);
-                    
+
                     var destination = await response.Content.ReadFromJsonAsync<DestinationModel>();
-                    
+
                     if (destination != null)
                     {
                         // Add well-known taglines for famous destinations
                         destination.Tagline = GetDestinationTagline(destination);
-                    
+
                         // If the destination doesn't have an image URL, try to get one from Unsplash
                         if (string.IsNullOrEmpty(destination.ImageUrl))
                         {
@@ -211,7 +212,7 @@ namespace WebApp.Services
                             {
                                 var searchQuery = $"{destination.City} {destination.Country} travel";
                                 var imageUrl = await _unsplashService.GetRandomImageUrlAsync(searchQuery);
-                                
+
                                 if (!string.IsNullOrEmpty(imageUrl))
                                 {
                                     destination.ImageUrl = imageUrl;
@@ -226,7 +227,7 @@ namespace WebApp.Services
                             }
                         }
                     }
-                    
+
                     return destination;
                 }
                 else
@@ -241,7 +242,7 @@ namespace WebApp.Services
                 return null;
             }
         }
-        
+
         /// <summary>
         /// Returns a well-known tagline for a destination based on city and country
         /// </summary>
@@ -273,16 +274,16 @@ namespace WebApp.Services
             {
                 // Set authentication token from cookie
                 await SetAuthHeaderAsync();
-                
+
                 // Create the request content
                 var content = new StringContent(
                     JsonSerializer.Serialize(destination),
                     Encoding.UTF8,
                     "application/json");
-                
+
                 // Make the API request
                 var response = await _httpClient.PostAsync($"{_apiBaseUrl}Destination", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
@@ -314,18 +315,18 @@ namespace WebApp.Services
             {
                 // Set authentication token
                 await SetAuthHeaderAsync();
-                
+
                 var json = JsonSerializer.Serialize(destination);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PutAsync($"{_apiBaseUrl}Destination/{id}", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     return JsonSerializer.Deserialize<DestinationModel>(responseContent, _jsonOptions);
                 }
-                
+
                 // Handle errors
                 return null;
             }
@@ -345,9 +346,9 @@ namespace WebApp.Services
             {
                 // Set authentication token
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.DeleteAsync($"{_apiBaseUrl}Destination/{id}");
-                
+
                 return response.IsSuccessStatusCode;
             }
             catch (Exception)
@@ -357,4 +358,4 @@ namespace WebApp.Services
             }
         }
     }
-} 
+}

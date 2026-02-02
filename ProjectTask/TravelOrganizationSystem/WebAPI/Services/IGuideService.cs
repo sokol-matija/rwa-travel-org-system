@@ -13,4 +13,4 @@ namespace WebAPI.Services
         Task<Guide> UpdateGuideAsync(int id, Guide guide);
         Task<bool> DeleteGuideAsync(int id);
     }
-} 
+}

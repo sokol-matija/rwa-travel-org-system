@@ -1,7 +1,7 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Reflection;
 
 namespace WebAPI.Swagger
 {
@@ -18,7 +18,7 @@ namespace WebAPI.Swagger
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             // Get endpoint metadata for controller and action
-            var hasAuthorize = 
+            var hasAuthorize =
                 context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ||
                 context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
 
@@ -28,7 +28,7 @@ namespace WebAPI.Swagger
             var authorizeAttributes = context.MethodInfo.GetCustomAttributes(true)
                 .Union(context.MethodInfo.DeclaringType.GetCustomAttributes(true))
                 .OfType<AuthorizeAttribute>();
-            
+
             var requiredRoles = authorizeAttributes
                 .Where(attr => !string.IsNullOrEmpty(attr.Roles))
                 .SelectMany(attr => attr.Roles.Split(','))
@@ -58,9 +58,9 @@ namespace WebAPI.Swagger
                 authDescription += $"\n\nRequired role(s): {string.Join(", ", requiredRoles)}";
             }
 
-            operation.Description = string.IsNullOrEmpty(operation.Description) 
-                ? authDescription 
+            operation.Description = string.IsNullOrEmpty(operation.Description)
+                ? authDescription
                 : $"{operation.Description}\n\n{authDescription}";
         }
     }
-} 
+}

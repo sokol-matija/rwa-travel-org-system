@@ -57,4 +57,4 @@ namespace WebApp.Models
             _ => "fas fa-file-alt"
         };
     }
-} 
+}

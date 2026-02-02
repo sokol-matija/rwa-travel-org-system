@@ -6,7 +6,7 @@ namespace WebAPI.Models
         public int GuideId { get; set; }
 
         // Navigation properties
-        public Trip Trip { get; set; }
-        public Guide Guide { get; set; }
+        public Trip Trip { get; set; } = null!;
+        public Guide Guide { get; set; } = null!;
     }
-} 
+}

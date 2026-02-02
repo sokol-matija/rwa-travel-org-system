@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using WebAPI.Services;
-using WebAPI.DTOs;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WebAPI.DTOs;
 using WebAPI.Models;
+using WebAPI.Services;
 
 namespace WebAPI.Controllers
 {
@@ -38,7 +38,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _userService.GetByIdAsync(id);
-            
+
             if (user == null)
                 return NotFound();
 
@@ -73,7 +73,7 @@ namespace WebAPI.Controllers
                 return Unauthorized();
 
             var user = await _userService.GetByIdAsync(userId);
-            
+
             if (user == null)
                 return NotFound();
 
@@ -156,7 +156,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
-            
+
             var userDtos = users.Select(user => new UserDTO
             {
                 Id = user.Id,
@@ -168,8 +168,8 @@ namespace WebAPI.Controllers
                 Address = user.Address,
                 IsAdmin = user.IsAdmin
             }).ToList();
-            
+
             return Ok(userDtos);
         }
     }
-} 
+}

@@ -1,12 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using WebAPI.DTOs;
 using WebAPI.Models;
 using WebAPI.Services;
-using WebAPI.DTOs;
-using System.Linq;
-using Microsoft.Extensions.Logging;
 
 namespace WebAPI.Controllers
 {
@@ -99,7 +99,7 @@ namespace WebAPI.Controllers
             // Validate pagination parameters
             if (page < 1)
                 return BadRequest("Page number must be 1 or greater");
-            
+
             if (count < 1 || count > 100)
                 return BadRequest("Count must be between 1 and 100");
 
@@ -289,19 +289,20 @@ namespace WebAPI.Controllers
                 {
                     // Create a search query based on trip name and destination
                     var searchQuery = $"{trip.Name} {trip.Destination?.City} travel";
-                    
+
                     // Here we would need access to UnsplashService, but this is the WebAPI project
                     // The UnsplashService is in the WebApp project
                     // We'll create a simpler solution instead
-                    
+
                     _logger.LogInformation($"Trip {trip.Id} ({trip.Name}) needs an image");
                     updatedTrips.Add($"Trip {trip.Id}: {trip.Name}");
                 }
 
-                return Ok(new { 
-                    message = "Trip image population identified", 
+                return Ok(new
+                {
+                    message = "Trip image population identified",
                     tripsNeedingImages = updatedTrips.Count,
-                    trips = updatedTrips 
+                    trips = updatedTrips
                 });
             }
             catch (Exception ex)
@@ -331,7 +332,7 @@ namespace WebAPI.Controllers
             try
             {
                 var success = await _tripService.UpdateTripImageAsync(id, request.ImageUrl);
-                
+
                 if (!success)
                     return NotFound($"Trip with ID {id} not found");
 
@@ -364,7 +365,7 @@ namespace WebAPI.Controllers
             try
             {
                 var success = await _tripService.UpdateTripImageAsync(id, request.ImageUrl);
-                
+
                 if (!success)
                     return NotFound($"Trip with ID {id} not found");
 
@@ -383,4 +384,4 @@ namespace WebAPI.Controllers
             public string ImageUrl { get; set; } = string.Empty;
         }
     }
-} 
+}

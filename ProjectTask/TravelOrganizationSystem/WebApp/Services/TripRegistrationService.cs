@@ -29,17 +29,17 @@ namespace WebApp.Services
             _httpContextAccessor = httpContextAccessor;
             _configuration = configuration;
             _logger = logger;
-            
+
             // Set API base URL - no additional prefix since BaseAddress already includes it
             _apiBaseUrl = "";
-            
+
             // Configure JSON options
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
         }
-        
+
         /// <summary>
         /// Set authentication token for API requests if user is logged in
         /// </summary>
@@ -47,11 +47,11 @@ namespace WebApp.Services
         {
             // Clear any existing Authorization headers
             _httpClient.DefaultRequestHeaders.Authorization = null;
-            
+
             // Get the current HTTP context
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext == null) return;
-            
+
             // Check if user is authenticated
             if (httpContext.User.Identity?.IsAuthenticated == true)
             {
@@ -74,16 +74,16 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.GetAsync("TripRegistration");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var registrations = JsonSerializer.Deserialize<List<TripRegistrationModel>>(content, _jsonOptions);
                     return registrations ?? new List<TripRegistrationModel>();
                 }
-                
+
                 _logger.LogWarning("Failed to get all registrations: {StatusCode}", response.StatusCode);
                 return new List<TripRegistrationModel>();
             }
@@ -103,15 +103,15 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.GetAsync($"TripRegistration/{id}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     return JsonSerializer.Deserialize<TripRegistrationModel>(content, _jsonOptions);
                 }
-                
+
                 _logger.LogWarning("Failed to get registration {Id}: {StatusCode}", id, response.StatusCode);
                 return null;
             }
@@ -131,16 +131,16 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.GetAsync($"TripRegistration/user/{userId}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var registrations = JsonSerializer.Deserialize<List<TripRegistrationModel>>(content, _jsonOptions);
                     return registrations ?? new List<TripRegistrationModel>();
                 }
-                
+
                 _logger.LogWarning("Failed to get registrations for user {UserId}: {StatusCode}", userId, response.StatusCode);
                 return new List<TripRegistrationModel>();
             }
@@ -160,16 +160,16 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.GetAsync($"TripRegistration/trip/{tripId}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var registrations = JsonSerializer.Deserialize<List<TripRegistrationModel>>(content, _jsonOptions);
                     return registrations ?? new List<TripRegistrationModel>();
                 }
-                
+
                 _logger.LogWarning("Failed to get registrations for trip {TripId}: {StatusCode}", tripId, response.StatusCode);
                 return new List<TripRegistrationModel>();
             }
@@ -189,18 +189,18 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var json = JsonSerializer.Serialize(registration);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PostAsync("TripRegistration", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     return JsonSerializer.Deserialize<TripRegistrationModel>(responseContent, _jsonOptions);
                 }
-                
+
                 _logger.LogWarning("Failed to create registration: {StatusCode}", response.StatusCode);
                 return null;
             }
@@ -220,18 +220,18 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var json = JsonSerializer.Serialize(registration);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PutAsync($"TripRegistration/{id}", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     return JsonSerializer.Deserialize<TripRegistrationModel>(responseContent, _jsonOptions);
                 }
-                
+
                 _logger.LogWarning("Failed to update registration {Id}: {StatusCode}", id, response.StatusCode);
                 return null;
             }
@@ -251,14 +251,14 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var response = await _httpClient.DeleteAsync($"TripRegistration/{id}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     return true;
                 }
-                
+
                 _logger.LogWarning("Failed to delete registration {Id}: {StatusCode}", id, response.StatusCode);
                 return false;
             }
@@ -278,16 +278,16 @@ namespace WebApp.Services
             {
                 // Set auth header
                 await SetAuthHeaderAsync();
-                
+
                 var content = new StringContent($"\"{status}\"", Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PatchAsync($"TripRegistration/{id}/status", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     return true;
                 }
-                
+
                 _logger.LogWarning("Failed to update registration {Id} status: {StatusCode}", id, response.StatusCode);
                 return false;
             }
@@ -307,7 +307,7 @@ namespace WebApp.Services
             {
                 // Set authentication token
                 await SetAuthHeaderAsync();
-                
+
                 // Get the current user ID
                 var currentUser = await _httpClient.GetAsync($"{_apiBaseUrl}User/current");
                 if (!currentUser.IsSuccessStatusCode)
@@ -315,52 +315,53 @@ namespace WebApp.Services
                     _logger.LogWarning("Failed to get current user: {StatusCode}", currentUser.StatusCode);
                     return new List<TripRegistrationModel>();
                 }
-                
+
                 var userContent = await currentUser.Content.ReadAsStringAsync();
                 var jsonOptions = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true,
                     ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
                 };
-                
+
                 UserModel user;
-                try 
+                try
                 {
                     user = JsonSerializer.Deserialize<UserModel>(userContent, jsonOptions);
-                } 
-                catch 
+                }
+                catch
                 {
                     // Try with reference-preserving format
-                    try 
+                    try
                     {
                         var responseObj = JsonSerializer.Deserialize<JsonDocument>(userContent, jsonOptions);
-                        user = responseObj?.RootElement.EnumerateObject().Count() > 0 
-                            ? JsonSerializer.Deserialize<UserModel>(userContent, jsonOptions) 
+                        user = responseObj?.RootElement.EnumerateObject().Count() > 0
+                            ? JsonSerializer.Deserialize<UserModel>(userContent, jsonOptions)
                             : null;
                     }
-                    catch 
+                    catch
                     {
                         user = null;
                     }
                 }
-                
+
                 if (user == null)
                 {
                     _logger.LogWarning("Current user is null");
                     return new List<TripRegistrationModel>();
                 }
-                
+
                 // Get the bookings for this user
                 var response = await _httpClient.GetAsync($"{_apiBaseUrl}TripRegistration/user/{user.Id}");
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogDebug("API Response for user trips: {Content}", content);
-                    
+
                     List<TripRegistrationModel> bookings;
-                    
-                    try {
+
+                    try
+                    {
                         // Try to parse directly first
                         bookings = JsonSerializer.Deserialize<List<TripRegistrationModel>>(content, jsonOptions);
                         if (bookings == null)
@@ -393,10 +394,10 @@ namespace WebApp.Services
                             bookings = new List<TripRegistrationModel>();
                         }
                     }
-                    
+
                     return bookings;
                 }
-                
+
                 // Handle errors
                 _logger.LogWarning("Failed to get user trips: {StatusCode}", response.StatusCode);
                 return new List<TripRegistrationModel>();
@@ -409,4 +410,4 @@ namespace WebApp.Services
             }
         }
     }
-} 
+}

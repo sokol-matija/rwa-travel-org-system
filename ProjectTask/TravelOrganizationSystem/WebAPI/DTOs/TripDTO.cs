@@ -90,4 +90,4 @@ namespace WebAPI.DTOs
         [Required]
         public int DestinationId { get; set; }
     }
-} 
+}

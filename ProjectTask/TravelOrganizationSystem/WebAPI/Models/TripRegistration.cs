@@ -28,7 +28,7 @@ namespace WebAPI.Models
         public string Status { get; set; } = "Confirmed";
 
         // Navigation properties
-        public User User { get; set; }
-        public Trip Trip { get; set; }
+        public User User { get; set; } = null!;
+        public Trip Trip { get; set; } = null!;
     }
-} 
+}

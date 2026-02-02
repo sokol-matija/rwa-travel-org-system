@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
 
 namespace WebApp.Controllers
@@ -37,7 +37,7 @@ namespace WebApp.Controllers
             {
                 // Get token from session (same pattern as AuthService)
                 var token = HttpContext.Session.GetString("Token");
-                
+
                 if (string.IsNullOrEmpty(token))
                 {
                     _logger.LogWarning("Profile update failed: No token found in session");
@@ -46,7 +46,7 @@ namespace WebApp.Controllers
 
                 // Set the authorization header
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                
+
                 // Create the profile update request (matching WebAPI DTO)
                 var profileUpdateData = new
                 {
@@ -65,17 +65,17 @@ namespace WebApp.Controllers
                 // Make the call to WebAPI
                 var response = await _httpClient.PutAsync($"{_apiBaseUrl}User/profile", content);
                 var responseContent = await response.Content.ReadAsStringAsync();
-                
-                _logger.LogInformation("Profile update response: Status={StatusCode}, Content={Content}", 
+
+                _logger.LogInformation("Profile update response: Status={StatusCode}, Content={Content}",
                     response.StatusCode, responseContent);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
-                    var updatedUser = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions 
-                    { 
-                        PropertyNameCaseInsensitive = true 
+                    var updatedUser = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
                     });
-                    
+
                     if (updatedUser != null)
                     {
                         return Ok(new
@@ -91,7 +91,7 @@ namespace WebApp.Controllers
                         });
                     }
                 }
-                
+
                 return BadRequest(new { message = "Failed to update profile", details = responseContent });
             }
             catch (Exception ex)
@@ -113,4 +113,4 @@ namespace WebApp.Controllers
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
     }
-} 
+}

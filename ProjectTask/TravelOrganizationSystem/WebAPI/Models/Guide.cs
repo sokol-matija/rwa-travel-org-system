@@ -9,19 +9,19 @@ namespace WebAPI.Models
 
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         [StringLength(500)]
-        public string Bio { get; set; }
+        public string? Bio { get; set; }
 
         [Required]
         [StringLength(100)]
         [EmailAddress]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [StringLength(20)]
         [Phone]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
         [StringLength(500)]
         public string? ImageUrl { get; set; }
@@ -29,6 +29,6 @@ namespace WebAPI.Models
         public int? YearsOfExperience { get; set; }
 
         // Navigation property
-        public ICollection<TripGuide> TripGuides { get; set; }
+        public ICollection<TripGuide> TripGuides { get; set; } = new List<TripGuide>();
     }
-} 
+}

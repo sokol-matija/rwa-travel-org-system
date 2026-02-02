@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WebAPI.DTOs;
 using WebAPI.Models;
 using WebAPI.Services;
-using WebAPI.DTOs;
 
 namespace WebAPI.Controllers
 {
@@ -157,4 +157,4 @@ namespace WebAPI.Controllers
             return NoContent();
         }
     }
-} 
+}

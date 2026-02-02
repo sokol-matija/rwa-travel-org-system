@@ -1,7 +1,7 @@
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Services;
-using System.Text.Json;
-using System.Text;
 
 namespace WebApp.Controllers
 {
@@ -14,7 +14,7 @@ namespace WebApp.Controllers
         private readonly IConfiguration _configuration;
 
         public UnsplashController(
-            IUnsplashService unsplashService, 
+            IUnsplashService unsplashService,
             ILogger<UnsplashController> logger,
             IConfiguration configuration)
         {
@@ -32,7 +32,7 @@ namespace WebApp.Controllers
         public async Task<IActionResult> GetRandomImage([FromQuery] string query)
         {
             _logger.LogInformation("Received request for Unsplash image with query: {Query}", query);
-            
+
             if (string.IsNullOrWhiteSpace(query))
             {
                 _logger.LogWarning("Query parameter is empty or missing");
@@ -43,7 +43,7 @@ namespace WebApp.Controllers
             {
                 _logger.LogInformation("Calling Unsplash service with query: {Query}", query);
                 var imageUrl = await _unsplashService.GetRandomImageUrlAsync(query);
-                
+
                 if (string.IsNullOrEmpty(imageUrl))
                 {
                     _logger.LogWarning("No image found for query: {Query}", query);
@@ -76,7 +76,7 @@ namespace WebApp.Controllers
                 // Get trips directly from WebAPI
                 using var httpClient = new HttpClient();
                 var tripsResponse = await httpClient.GetAsync($"{apiBaseUrl}Trip");
-                
+
                 if (!tripsResponse.IsSuccessStatusCode)
                 {
                     return StatusCode(500, "Failed to get trips from API");
@@ -87,8 +87,8 @@ namespace WebApp.Controllers
 
                 // Parse trips JSON (handle reference format)
                 using var document = JsonDocument.Parse(tripsJson);
-                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement) 
-                    ? valuesElement 
+                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement)
+                    ? valuesElement
                     : document.RootElement;
 
                 var random = new Random();
@@ -98,8 +98,8 @@ namespace WebApp.Controllers
                 {
                     var tripId = tripElement.GetProperty("id").GetInt32();
                     var tripName = tripElement.GetProperty("name").GetString() ?? "";
-                    var hasImage = tripElement.TryGetProperty("imageUrl", out var imageUrlProp) 
-                        && imageUrlProp.ValueKind != JsonValueKind.Null 
+                    var hasImage = tripElement.TryGetProperty("imageUrl", out var imageUrlProp)
+                        && imageUrlProp.ValueKind != JsonValueKind.Null
                         && !string.IsNullOrEmpty(imageUrlProp.GetString());
 
                     if (!hasImage)
@@ -138,36 +138,39 @@ namespace WebApp.Controllers
                                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                                 var updateResponse = await httpClient.PutAsync($"{apiBaseUrl}Trip/{tripId}/image/public", content);
-                                
+
                                 if (updateResponse.IsSuccessStatusCode)
                                 {
-                                    results.Add(new { 
-                                        tripId, 
-                                        tripName, 
-                                        imageUrl, 
+                                    results.Add(new
+                                    {
+                                        tripId,
+                                        tripName,
+                                        imageUrl,
                                         searchQuery,
-                                        status = "✅ SUCCESS" 
+                                        status = "✅ SUCCESS"
                                     });
                                     _logger.LogInformation("Successfully updated trip {TripId} with image", tripId);
                                 }
                                 else
                                 {
                                     var errorContent = await updateResponse.Content.ReadAsStringAsync();
-                                    results.Add(new { 
-                                        tripId, 
-                                        tripName, 
+                                    results.Add(new
+                                    {
+                                        tripId,
+                                        tripName,
                                         error = $"API update failed: {updateResponse.StatusCode} - {errorContent}",
-                                        status = "❌ API_ERROR" 
+                                        status = "❌ API_ERROR"
                                     });
                                 }
                             }
                             else
                             {
-                                results.Add(new { 
-                                    tripId, 
-                                    tripName, 
+                                results.Add(new
+                                {
+                                    tripId,
+                                    tripName,
                                     error = "No image found from Unsplash",
-                                    status = "❌ NO_IMAGE" 
+                                    status = "❌ NO_IMAGE"
                                 });
                             }
 
@@ -177,25 +180,28 @@ namespace WebApp.Controllers
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, "Error processing trip {TripId}", tripId);
-                            results.Add(new { 
-                                tripId, 
-                                tripName, 
+                            results.Add(new
+                            {
+                                tripId,
+                                tripName,
                                 error = ex.Message,
-                                status = "❌ EXCEPTION" 
+                                status = "❌ EXCEPTION"
                             });
                         }
                     }
                     else
                     {
-                        results.Add(new { 
-                            tripId, 
-                            tripName, 
-                            status = "⏭️ ALREADY_HAS_IMAGE" 
+                        results.Add(new
+                        {
+                            tripId,
+                            tripName,
+                            status = "⏭️ ALREADY_HAS_IMAGE"
                         });
                     }
                 }
 
-                return Ok(new {
+                return Ok(new
+                {
                     message = "Trip image population completed",
                     totalProcessed = results.Count,
                     successful = results.Count(r => r.GetType().GetProperty("status")?.GetValue(r)?.ToString() == "✅ SUCCESS"),
@@ -225,7 +231,7 @@ namespace WebApp.Controllers
                 // Get trips directly from WebAPI
                 using var httpClient = new HttpClient();
                 var tripsResponse = await httpClient.GetAsync($"{apiBaseUrl}Trip");
-                
+
                 if (!tripsResponse.IsSuccessStatusCode)
                 {
                     return StatusCode(500, $"Failed to get trips from API: {tripsResponse.StatusCode}");
@@ -236,8 +242,8 @@ namespace WebApp.Controllers
 
                 // Parse trips JSON (handle reference format)
                 using var document = JsonDocument.Parse(tripsJson);
-                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement) 
-                    ? valuesElement 
+                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement)
+                    ? valuesElement
                     : document.RootElement;
 
                 var tripCount = 0;
@@ -247,7 +253,7 @@ namespace WebApp.Controllers
 
                     var tripId = tripElement.GetProperty("id").GetInt32();
                     var tripName = tripElement.GetProperty("name").GetString() ?? "";
-                    
+
                     tripCount++;
 
                     try
@@ -269,15 +275,16 @@ namespace WebApp.Controllers
 
                             var updateResponse = await httpClient.PutAsync($"{apiBaseUrl}Trip/{tripId}/image/public", content);
                             var responseContent = await updateResponse.Content.ReadAsStringAsync();
-                            
+
                             _logger.LogInformation("Update response: {StatusCode} - {Content}", updateResponse.StatusCode, responseContent);
 
                             if (updateResponse.IsSuccessStatusCode)
                             {
-                                results.Add(new { 
-                                    tripId, 
-                                    tripName, 
-                                    imageUrl, 
+                                results.Add(new
+                                {
+                                    tripId,
+                                    tripName,
+                                    imageUrl,
                                     searchQuery,
                                     status = "✅ SUCCESS",
                                     apiResponse = responseContent
@@ -285,21 +292,23 @@ namespace WebApp.Controllers
                             }
                             else
                             {
-                                results.Add(new { 
-                                    tripId, 
-                                    tripName, 
+                                results.Add(new
+                                {
+                                    tripId,
+                                    tripName,
                                     error = $"API update failed: {updateResponse.StatusCode} - {responseContent}",
-                                    status = "❌ API_ERROR" 
+                                    status = "❌ API_ERROR"
                                 });
                             }
                         }
                         else
                         {
-                            results.Add(new { 
-                                tripId, 
-                                tripName, 
+                            results.Add(new
+                            {
+                                tripId,
+                                tripName,
                                 error = "No image found from Unsplash",
-                                status = "❌ NO_IMAGE" 
+                                status = "❌ NO_IMAGE"
                             });
                         }
 
@@ -309,16 +318,18 @@ namespace WebApp.Controllers
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Error processing trip {TripId}", tripId);
-                        results.Add(new { 
-                            tripId, 
-                            tripName, 
+                        results.Add(new
+                        {
+                            tripId,
+                            tripName,
                             error = ex.Message,
-                            status = "❌ EXCEPTION" 
+                            status = "❌ EXCEPTION"
                         });
                     }
                 }
 
-                return Ok(new {
+                return Ok(new
+                {
                     message = "TEST trip image population completed",
                     totalProcessed = results.Count,
                     successful = results.Count(r => r.GetType().GetProperty("status")?.GetValue(r)?.ToString() == "✅ SUCCESS"),
@@ -348,7 +359,7 @@ namespace WebApp.Controllers
                 // Get trips directly from WebAPI
                 using var httpClient = new HttpClient();
                 var tripsResponse = await httpClient.GetAsync($"{apiBaseUrl}Trip");
-                
+
                 if (!tripsResponse.IsSuccessStatusCode)
                 {
                     return StatusCode(500, $"Failed to get trips from API: {tripsResponse.StatusCode}");
@@ -358,8 +369,8 @@ namespace WebApp.Controllers
 
                 // Parse trips JSON (handle reference format)
                 using var document = JsonDocument.Parse(tripsJson);
-                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement) 
-                    ? valuesElement 
+                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement)
+                    ? valuesElement
                     : document.RootElement;
 
                 var random = new Random();
@@ -388,7 +399,7 @@ namespace WebApp.Controllers
                         };
 
                         // Add city context for more uniqueness
-                        var cityContext = tripElement.TryGetProperty("destinationName", out var destProp) 
+                        var cityContext = tripElement.TryGetProperty("destinationName", out var destProp)
                             ? destProp.GetString()?.ToLower() ?? ""
                             : "";
 
@@ -409,13 +420,14 @@ namespace WebApp.Controllers
                             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                             var updateResponse = await httpClient.PutAsync($"{apiBaseUrl}Trip/{tripId}/image/public", content);
-                            
+
                             if (updateResponse.IsSuccessStatusCode)
                             {
-                                results.Add(new { 
-                                    tripId, 
-                                    tripName, 
-                                    imageUrl, 
+                                results.Add(new
+                                {
+                                    tripId,
+                                    tripName,
+                                    imageUrl,
                                     searchQuery,
                                     status = "✅ FORCE_UPDATED",
                                     uniqueId = imageUrl.Split('?')[0].Split('/').Last()
@@ -425,21 +437,23 @@ namespace WebApp.Controllers
                             else
                             {
                                 var errorContent = await updateResponse.Content.ReadAsStringAsync();
-                                results.Add(new { 
-                                    tripId, 
-                                    tripName, 
+                                results.Add(new
+                                {
+                                    tripId,
+                                    tripName,
                                     error = $"API update failed: {updateResponse.StatusCode} - {errorContent}",
-                                    status = "❌ API_ERROR" 
+                                    status = "❌ API_ERROR"
                                 });
                             }
                         }
                         else
                         {
-                            results.Add(new { 
-                                tripId, 
-                                tripName, 
+                            results.Add(new
+                            {
+                                tripId,
+                                tripName,
                                 error = "No image found from Unsplash",
-                                status = "❌ NO_IMAGE" 
+                                status = "❌ NO_IMAGE"
                             });
                         }
 
@@ -449,16 +463,18 @@ namespace WebApp.Controllers
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Error FORCE REFRESHING trip {TripId}", tripId);
-                        results.Add(new { 
-                            tripId, 
-                            tripName, 
+                        results.Add(new
+                        {
+                            tripId,
+                            tripName,
                             error = ex.Message,
-                            status = "❌ EXCEPTION" 
+                            status = "❌ EXCEPTION"
                         });
                     }
                 }
 
-                return Ok(new {
+                return Ok(new
+                {
                     message = "🔄 FORCE REFRESH completed - all trips now have UNIQUE images!",
                     explanation = "All trip images have been forcefully updated with unique Unsplash images based on trip themes",
                     totalProcessed = results.Count,
@@ -490,9 +506,9 @@ namespace WebApp.Controllers
                 // Get trips directly from WebAPI
                 using var httpClient = new HttpClient();
                 httpClient.Timeout = TimeSpan.FromSeconds(10); // Set timeout for image checks
-                
+
                 var tripsResponse = await httpClient.GetAsync($"{apiBaseUrl}Trip");
-                
+
                 if (!tripsResponse.IsSuccessStatusCode)
                 {
                     return StatusCode(500, $"Failed to get trips from API: {tripsResponse.StatusCode}");
@@ -502,40 +518,40 @@ namespace WebApp.Controllers
 
                 // Parse trips JSON (handle reference format)
                 using var document = JsonDocument.Parse(tripsJson);
-                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement) 
-                    ? valuesElement 
+                var tripsArray = document.RootElement.TryGetProperty("$values", out var valuesElement)
+                    ? valuesElement
                     : document.RootElement;
 
                 // Reliable fallback image collections based on trip themes
                 var fallbackImages = new Dictionary<string, string[]>
                 {
-                    ["art"] = new[] { 
+                    ["art"] = new[] {
                         "https://images.unsplash.com/photo-1499678329028-101435549a4e",
-                        "https://images.unsplash.com/photo-1544967882-7add98b6b63b" 
+                        "https://images.unsplash.com/photo-1544967882-7add98b6b63b"
                     },
-                    ["rome"] = new[] { 
+                    ["rome"] = new[] {
                         "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b",
-                        "https://images.unsplash.com/photo-1552832230-c0197040cd35" 
+                        "https://images.unsplash.com/photo-1552832230-c0197040cd35"
                     },
-                    ["barcelona"] = new[] { 
+                    ["barcelona"] = new[] {
                         "https://images.unsplash.com/photo-1539650116574-75c0c6d45d2e",
-                        "https://images.unsplash.com/photo-1511527844068-006b95d162c2" 
+                        "https://images.unsplash.com/photo-1511527844068-006b95d162c2"
                     },
-                    ["london"] = new[] { 
+                    ["london"] = new[] {
                         "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad",
-                        "https://images.unsplash.com/photo-1533929736458-ca588d08c8be" 
+                        "https://images.unsplash.com/photo-1533929736458-ca588d08c8be"
                     },
-                    ["tokyo"] = new[] { 
+                    ["tokyo"] = new[] {
                         "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf",
-                        "https://images.unsplash.com/photo-1542051841857-5f90071e7989" 
+                        "https://images.unsplash.com/photo-1542051841857-5f90071e7989"
                     },
-                    ["paris"] = new[] { 
+                    ["paris"] = new[] {
                         "https://images.unsplash.com/photo-1502602898536-47ad22581b52",
-                        "https://images.unsplash.com/photo-1499678329028-101435549a4e" 
+                        "https://images.unsplash.com/photo-1499678329028-101435549a4e"
                     },
-                    ["travel"] = new[] { 
+                    ["travel"] = new[] {
                         "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800",
-                        "https://images.unsplash.com/photo-1488646953014-85cb44e25828" 
+                        "https://images.unsplash.com/photo-1488646953014-85cb44e25828"
                     }
                 };
 
@@ -543,15 +559,16 @@ namespace WebApp.Controllers
                 {
                     var tripId = tripElement.GetProperty("id").GetInt32();
                     var tripName = tripElement.GetProperty("name").GetString() ?? "";
-                    var currentImageUrl = tripElement.TryGetProperty("imageUrl", out var imageUrlProp) 
+                    var currentImageUrl = tripElement.TryGetProperty("imageUrl", out var imageUrlProp)
                         ? imageUrlProp.GetString() ?? ""
                         : "";
 
                     if (string.IsNullOrEmpty(currentImageUrl))
                     {
-                        results.Add(new { 
-                            tripId, 
-                            tripName, 
+                        results.Add(new
+                        {
+                            tripId,
+                            tripName,
                             status = "⚠️ NO_IMAGE",
                             action = "Skipped - no image URL to check"
                         });
@@ -562,14 +579,15 @@ namespace WebApp.Controllers
                     {
                         // Check if current image is accessible
                         _logger.LogInformation("Checking image for trip {TripId}: {ImageUrl}", tripId, currentImageUrl);
-                        
+
                         var imageCheckResponse = await httpClient.GetAsync(currentImageUrl, HttpCompletionOption.ResponseHeadersRead);
-                        
+
                         if (imageCheckResponse.IsSuccessStatusCode)
                         {
-                            results.Add(new { 
-                                tripId, 
-                                tripName, 
+                            results.Add(new
+                            {
+                                tripId,
+                                tripName,
                                 imageUrl = currentImageUrl,
                                 status = "✅ IMAGE_OK",
                                 action = "No action needed - image is working"
@@ -578,11 +596,11 @@ namespace WebApp.Controllers
                         else
                         {
                             _logger.LogWarning("Broken image detected for trip {TripId}: {StatusCode}", tripId, imageCheckResponse.StatusCode);
-                            
+
                             // Determine fallback category based on trip name
                             var category = "travel"; // default fallback
                             var tripNameLower = tripName.ToLower();
-                            
+
                             if (tripNameLower.Contains("rome")) category = "rome";
                             else if (tripNameLower.Contains("paris")) category = "paris";
                             else if (tripNameLower.Contains("barcelona")) category = "barcelona";
@@ -593,7 +611,7 @@ namespace WebApp.Controllers
                             // Get a reliable fallback image
                             var fallbackOptions = fallbackImages[category];
                             var selectedFallback = fallbackOptions[tripId % fallbackOptions.Length]; // Ensure different images
-                            
+
                             // Add cache-busting parameter to ensure fresh request
                             var fallbackImageUrl = $"{selectedFallback}?w=1080&q=80&fit=max&auto=format";
 
@@ -603,12 +621,13 @@ namespace WebApp.Controllers
                             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                             var updateResponse = await httpClient.PutAsync($"{apiBaseUrl}Trip/{tripId}/image/public", content);
-                            
+
                             if (updateResponse.IsSuccessStatusCode)
                             {
-                                results.Add(new { 
-                                    tripId, 
-                                    tripName, 
+                                results.Add(new
+                                {
+                                    tripId,
+                                    tripName,
                                     oldImageUrl = currentImageUrl,
                                     newImageUrl = fallbackImageUrl,
                                     category,
@@ -619,11 +638,12 @@ namespace WebApp.Controllers
                             }
                             else
                             {
-                                results.Add(new { 
-                                    tripId, 
-                                    tripName, 
+                                results.Add(new
+                                {
+                                    tripId,
+                                    tripName,
                                     error = $"Failed to update: {updateResponse.StatusCode}",
-                                    status = "❌ UPDATE_FAILED" 
+                                    status = "❌ UPDATE_FAILED"
                                 });
                             }
                         }
@@ -634,11 +654,12 @@ namespace WebApp.Controllers
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Error checking image for trip {TripId}", tripId);
-                        results.Add(new { 
-                            tripId, 
-                            tripName, 
+                        results.Add(new
+                        {
+                            tripId,
+                            tripName,
                             error = ex.Message,
-                            status = "❌ CHECK_ERROR" 
+                            status = "❌ CHECK_ERROR"
                         });
                     }
                 }
@@ -646,7 +667,8 @@ namespace WebApp.Controllers
                 var fixedCount = results.Count(r => r.GetType().GetProperty("status")?.GetValue(r)?.ToString() == "🔄 FIXED");
                 var workingCount = results.Count(r => r.GetType().GetProperty("status")?.GetValue(r)?.ToString() == "✅ IMAGE_OK");
 
-                return Ok(new {
+                return Ok(new
+                {
                     message = "🛡️ Broken image detection and repair completed",
                     summary = $"Found {workingCount} working images, fixed {fixedCount} broken images",
                     totalProcessed = results.Count,
@@ -663,4 +685,4 @@ namespace WebApp.Controllers
             }
         }
     }
-} 
+}

@@ -47,4 +47,4 @@ namespace WebApp.ViewModels
         [Display(Name = "I agree to the terms and conditions")]
         public bool AgreeToTerms { get; set; }
     }
-} 
+}

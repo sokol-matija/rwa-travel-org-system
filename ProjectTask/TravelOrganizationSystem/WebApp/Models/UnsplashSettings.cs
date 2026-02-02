@@ -7,4 +7,4 @@ namespace WebApp.Models
         public string ApplicationId { get; set; } = string.Empty;
         public int CacheDurationMinutes { get; set; } = 60; // Default cache duration
     }
-} 
+}
