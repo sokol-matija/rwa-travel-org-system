@@ -146,7 +146,7 @@ namespace WebAPI.Controllers
         /// Update a destination's image URL
         /// </summary>
         /// <param name="id">The ID of the destination to update</param>
-        /// <param name="imageUrl">The new image URL</param>
+        /// <param name="model">The model containing the new image URL</param>
         /// <remarks>
         /// This endpoint requires Admin role access
         /// </remarks>

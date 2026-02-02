@@ -27,7 +27,7 @@ namespace WebAPI.Services
         {
             // Get JWT settings from configuration
             var jwtSettings = _configuration.GetSection("JwtSettings");
-            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
+            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret is not configured"));
             var issuer = jwtSettings["Issuer"];
             var audience = jwtSettings["Audience"];
             var expiryInMinutes = Convert.ToDouble(jwtSettings["ExpiryInMinutes"]);

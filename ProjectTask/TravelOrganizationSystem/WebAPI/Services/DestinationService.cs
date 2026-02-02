@@ -22,7 +22,7 @@ namespace WebAPI.Services
             return await _context.Destinations.ToListAsync();
         }
 
-        public async Task<Destination> GetDestinationByIdAsync(int id)
+        public async Task<Destination?> GetDestinationByIdAsync(int id)
         {
             return await _context.Destinations.FindAsync(id);
         }
@@ -35,7 +35,7 @@ namespace WebAPI.Services
             return destination;
         }
 
-        public async Task<Destination> UpdateDestinationAsync(int id, Destination destination)
+        public async Task<Destination?> UpdateDestinationAsync(int id, Destination destination)
         {
             var existingDestination = await _context.Destinations.FindAsync(id);
             if (existingDestination == null)

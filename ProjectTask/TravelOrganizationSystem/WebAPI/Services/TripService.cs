@@ -28,7 +28,7 @@ namespace WebAPI.Services
                 .ToListAsync();
         }
 
-        public async Task<Trip> GetTripByIdAsync(int id)
+        public async Task<Trip?> GetTripByIdAsync(int id)
         {
             return await _context.Trips
                 .Include(t => t.Destination)
@@ -94,7 +94,7 @@ namespace WebAPI.Services
             return trip;
         }
 
-        public async Task<Trip> UpdateTripAsync(int id, Trip trip)
+        public async Task<Trip?> UpdateTripAsync(int id, Trip trip)
         {
             var existingTrip = await _context.Trips.FindAsync(id);
             if (existingTrip == null)

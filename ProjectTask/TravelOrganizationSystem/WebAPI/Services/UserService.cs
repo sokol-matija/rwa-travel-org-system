@@ -159,13 +159,13 @@ namespace WebAPI.Services
             // In a real application, you would use a proper password hasher like BCrypt
             // For simplicity, we're using ASP.NET Core's PasswordHasher here
             var hasher = new PasswordHasher<User>();
-            return hasher.HashPassword(null, password);
+            return hasher.HashPassword(null!, password);
         }
 
         private bool VerifyPasswordHash(string password, string storedHash)
         {
             var hasher = new PasswordHasher<User>();
-            var result = hasher.VerifyHashedPassword(null, storedHash, password);
+            var result = hasher.VerifyHashedPassword(null!, storedHash, password);
             return result == PasswordVerificationResult.Success;
         }
     }

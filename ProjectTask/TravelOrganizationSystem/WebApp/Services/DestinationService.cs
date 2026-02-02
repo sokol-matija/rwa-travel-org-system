@@ -93,7 +93,7 @@ namespace WebApp.Services
                         ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
                     };
 
-                    List<DestinationModel> destinations;
+                    List<DestinationModel>? destinations;
 
                     try
                     {

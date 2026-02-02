@@ -23,7 +23,7 @@ namespace WebAPI.Services
             return await _context.Guides.ToListAsync();
         }
 
-        public async Task<Guide> GetGuideByIdAsync(int id)
+        public async Task<Guide?> GetGuideByIdAsync(int id)
         {
             return await _context.Guides.FindAsync(id);
         }
@@ -44,7 +44,7 @@ namespace WebAPI.Services
             return guide;
         }
 
-        public async Task<Guide> UpdateGuideAsync(int id, Guide guide)
+        public async Task<Guide?> UpdateGuideAsync(int id, Guide guide)
         {
             var existingGuide = await _context.Guides.FindAsync(id);
             if (existingGuide == null)

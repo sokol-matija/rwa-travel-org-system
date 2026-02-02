@@ -19,19 +19,19 @@ namespace WebAPI.Swagger
         {
             // Get endpoint metadata for controller and action
             var hasAuthorize =
-                context.MethodInfo.DeclaringType.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() ||
+                context.MethodInfo.DeclaringType?.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any() == true ||
                 context.MethodInfo.GetCustomAttributes(true).OfType<AuthorizeAttribute>().Any();
 
             if (!hasAuthorize) return;
 
             // Get any roles required
             var authorizeAttributes = context.MethodInfo.GetCustomAttributes(true)
-                .Union(context.MethodInfo.DeclaringType.GetCustomAttributes(true))
+                .Union(context.MethodInfo.DeclaringType?.GetCustomAttributes(true) ?? Array.Empty<object>())
                 .OfType<AuthorizeAttribute>();
 
             var requiredRoles = authorizeAttributes
                 .Where(attr => !string.IsNullOrEmpty(attr.Roles))
-                .SelectMany(attr => attr.Roles.Split(','))
+                .SelectMany(attr => attr.Roles!.Split(','))
                 .Distinct()
                 .ToList();
 

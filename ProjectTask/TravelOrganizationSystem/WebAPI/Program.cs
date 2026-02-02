@@ -56,7 +56,7 @@ builder.Services.AddScoped<ITripRegistrationService, TripRegistrationService>();
 
 // Configure JWT authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
+var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret is not configured"));
 
 builder.Services.AddAuthentication(x =>
 {

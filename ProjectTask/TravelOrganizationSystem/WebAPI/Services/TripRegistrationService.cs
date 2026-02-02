@@ -28,7 +28,7 @@ namespace WebAPI.Services
                 .ToListAsync();
         }
 
-        public async Task<TripRegistration> GetRegistrationByIdAsync(int id)
+        public async Task<TripRegistration?> GetRegistrationByIdAsync(int id)
         {
             return await _context.TripRegistrations
                 .Include(tr => tr.User)
@@ -54,7 +54,7 @@ namespace WebAPI.Services
                 .ToListAsync();
         }
 
-        public async Task<TripRegistration> CreateRegistrationAsync(TripRegistration registration)
+        public async Task<TripRegistration?> CreateRegistrationAsync(TripRegistration registration)
         {
             // Check if the trip exists and has available slots
             var trip = await _context.Trips.FindAsync(registration.TripId);
@@ -84,7 +84,7 @@ namespace WebAPI.Services
             return registration;
         }
 
-        public async Task<TripRegistration> UpdateRegistrationAsync(int id, TripRegistration registration)
+        public async Task<TripRegistration?> UpdateRegistrationAsync(int id, TripRegistration registration)
         {
             var existingRegistration = await _context.TripRegistrations.FindAsync(id);
             if (existingRegistration == null)

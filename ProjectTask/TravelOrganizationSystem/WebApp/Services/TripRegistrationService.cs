@@ -323,7 +323,7 @@ namespace WebApp.Services
                     ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve
                 };
 
-                UserModel user;
+                UserModel? user;
                 try
                 {
                     user = JsonSerializer.Deserialize<UserModel>(userContent, jsonOptions);
@@ -358,7 +358,7 @@ namespace WebApp.Services
                     var content = await response.Content.ReadAsStringAsync();
                     _logger.LogDebug("API Response for user trips: {Content}", content);
 
-                    List<TripRegistrationModel> bookings;
+                    List<TripRegistrationModel>? bookings;
 
                     try
                     {

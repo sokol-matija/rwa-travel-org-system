@@ -201,7 +201,7 @@ namespace WebApp.Services
         /// <summary>
         /// Helper method to parse logs from JSON response
         /// </summary>
-        private async Task<List<LogModel>> ParseLogsFromJsonAsync(string jsonContent)
+        private Task<List<LogModel>> ParseLogsFromJsonAsync(string jsonContent)
         {
             var logs = new List<LogModel>();
 
@@ -222,7 +222,7 @@ namespace WebApp.Services
                 else
                 {
                     _logger.LogWarning("Unexpected JSON structure in ParseLogsFromJsonAsync");
-                    return logs;
+                    return Task.FromResult(logs);
                 }
 
                 // Process each log in the array
@@ -255,7 +255,7 @@ namespace WebApp.Services
                 }
             }
 
-            return logs;
+            return Task.FromResult(logs);
         }
 
         /// <summary>
