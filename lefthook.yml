@@ -1,0 +1,30 @@
+# Lefthook configuration for git hooks
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    # Secret scanning on staged files
+    gitleaks:
+      root: "ProjectTask/TravelOrganizationSystem/"
+      run: gitleaks protect --staged --verbose --redact --config=.gitleaks.toml
+
+    # Code formatting on staged C# files
+    format:
+      root: "ProjectTask/TravelOrganizationSystem/"
+      glob: "*.cs"
+      run: dotnet format --verbosity quiet && git add -u
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    # Validate commit message format (conventional commits)
+    commitlint:
+      run: npx --no -- commitlint --edit {1}
+
+pre-push:
+  commands:
+    # Build validation before push
+    build:
+      root: "ProjectTask/TravelOrganizationSystem/"
+      run: dotnet build --no-restore --verbosity quiet

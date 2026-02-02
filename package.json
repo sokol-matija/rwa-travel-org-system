@@ -1,0 +1,14 @@
+{
+  "name": "travel-organization-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Git hooks and commit tooling for Travel Organization System",
+  "scripts": {
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0"
+  }
+}
