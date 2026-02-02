@@ -1,0 +1,33 @@
+# Gitleaks configuration file
+# Reference: https://github.com/gitleaks/gitleaks#configuration
+
+title = "Travel Organization System - Gitleaks Config"
+
+# Extend the default gitleaks config
+[extend]
+useDefault = true
+
+# Path-based allowlists - exclude files from scanning
+[allowlist]
+description = "Allowlisted files"
+paths = [
+    # Build artifacts - contain copied config files with development keys
+    '''.*\/bin\/.*''',
+    '''.*\/obj\/.*''',
+
+    # SonarQube temporary analysis files
+    '''\.sonarqube\/.*''',
+
+    # Local development scripts (already gitignored)
+    '''scripts\/.*''',
+
+    # Development appsettings files (already gitignored)
+    '''.*appsettings\..*\.json$''',
+    '''.*appsettings\.json$''',
+]
+
+# Regex-based allowlists
+regexes = [
+    # Allow GUIDs that are project identifiers, not secrets
+    '''[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\.sonar\.''',
+]
