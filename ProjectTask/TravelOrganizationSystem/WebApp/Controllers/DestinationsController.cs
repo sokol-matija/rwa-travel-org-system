@@ -6,6 +6,7 @@ using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
     public class DestinationsController : Controller
     {
         private readonly IDestinationService _destinationService;

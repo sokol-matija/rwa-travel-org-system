@@ -7,6 +7,7 @@ using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
     public class TripsController : Controller
     {
         private readonly ITripService _tripService;
@@ -90,6 +91,7 @@ namespace WebApp.Controllers
             return RedirectToAction("Index", new { DestinationId, page });
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -300,7 +302,6 @@ namespace WebApp.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Book(int id)
         {
@@ -338,8 +339,8 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        [Authorize]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Book(TripBookViewModel vm)
         {
             ModelState.Remove("Trip");
@@ -375,7 +376,6 @@ namespace WebApp.Controllers
             }
         }
 
-        [Authorize]
         public async Task<IActionResult> MyBookings()
         {
             var vm = new MyBookingsViewModel();
@@ -393,8 +393,8 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        [Authorize]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelBooking(int id)
         {
             try

@@ -7,6 +7,7 @@ using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
@@ -27,16 +28,25 @@ namespace WebApp.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            // Validate returnUrl to prevent open redirect attacks
+            var safeReturnUrl = Url.Content("~/");
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                safeReturnUrl = returnUrl;
+            }
+
             var model = new LoginViewModel
             {
-                ReturnUrl = returnUrl ?? Url.Content("~/")
+                ReturnUrl = safeReturnUrl
             };
-            return View(model);
+            return View(model); // nosemgrep: csharp.dotnet.security.audit.mass-assignment.mass-assignment
         }
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(
+            [Bind("Username,Password,RememberMe,ReturnUrl")] LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -75,7 +85,9 @@ namespace WebApp.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(
+            [Bind("Username,Email,Password,ConfirmPassword,FirstName,LastName,PhoneNumber,Address,AgreeToTerms")] RegisterViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -96,7 +108,6 @@ namespace WebApp.Controllers
             return View(model);
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
@@ -141,6 +152,8 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             if (_authService.IsAuthenticated())
@@ -152,15 +165,14 @@ namespace WebApp.Controllers
             return View();
         }
 
-        [Authorize]
         [HttpGet]
         public IActionResult ChangePassword()
         {
             return View(new ChangePasswordViewModel());
         }
 
-        [Authorize]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)

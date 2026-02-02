@@ -6,6 +6,7 @@ using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -17,7 +18,6 @@ namespace WebApp.Controllers
             _destinationService = destinationService;
         }
 
-        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var vm = new HomeViewModel();
@@ -38,7 +38,6 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        [AllowAnonymous]
         public IActionResult Privacy()
         {
             return View();
