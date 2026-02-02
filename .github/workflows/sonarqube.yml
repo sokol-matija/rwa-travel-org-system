@@ -1,0 +1,101 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sonarqube-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonarqube:
+    name: SonarQube Scan
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0 # Full history for better SonarQube analysis
+          persist-credentials: false
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@4e4c49acaa9818630ce0bd7a564372c17e33fb4d # v2.0.3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.1.0
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
+        with:
+          java-version: 17
+          distribution: 'zulu'
+
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Restore dependencies
+        working-directory: ProjectTask/TravelOrganizationSystem
+        run: dotnet restore
+
+      - name: Begin SonarQube Analysis
+        working-directory: ProjectTask/TravelOrganizationSystem
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          dotnet sonarscanner begin `
+            /k:"TravelOrganizationSystem" `
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.qualitygate.wait=false
+
+      - name: Build solution
+        working-directory: ProjectTask/TravelOrganizationSystem
+        run: dotnet build --no-restore --configuration Release
+
+      # Uncomment when you add tests with coverage
+      # - name: Run tests with coverage
+      #   working-directory: ProjectTask/TravelOrganizationSystem
+      #   run: |
+      #     dotnet test --no-build --configuration Release `
+      #       --collect:"XPlat Code Coverage" `
+      #       --results-directory ./coverage `
+      #       --logger "trx;LogFileName=test-results.trx" `
+      #       -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - name: End SonarQube Analysis
+        working-directory: ProjectTask/TravelOrganizationSystem
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Notify via ntfy.sh
+        if: always()
+        shell: bash
+        run: |
+          STATUS="${{ job.status }}"
+          if [ "$STATUS" = "success" ]; then
+            EMOJI="white_check_mark"
+            PRIORITY="3"
+          else
+            EMOJI="x"
+            PRIORITY="4"
+          fi
+          curl -s \
+            -H "Title: SonarQube Analysis Complete" \
+            -H "Priority: $PRIORITY" \
+            -H "Tags: $EMOJI,sonarqube,dotnet" \
+            -H "Click: ${{ secrets.SONAR_HOST_URL }}/dashboard?id=TravelOrganizationSystem" \
+            -d "TravelOrganizationSystem analysis finished: $STATUS" \
+            https://ntfy.sh/github-workflows-msokol
