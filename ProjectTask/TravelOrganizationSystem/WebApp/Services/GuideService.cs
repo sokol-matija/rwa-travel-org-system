@@ -7,10 +7,6 @@ using WebApp.Models;
 
 namespace WebApp.Services
 {
-    /// <summary>
-    /// Service for managing travel guides through API calls
-    /// Handles name field mapping between API (single Name) and WebApp (FirstName/LastName)
-    /// </summary>
     public class GuideService : IGuideService
     {
         private readonly HttpClient _httpClient;
@@ -30,9 +26,6 @@ namespace WebApp.Services
                 _apiBaseUrl += "/";
         }
 
-        /// <summary>
-        /// Set authentication token for API requests if user is logged in
-        /// </summary>
         private async Task SetAuthHeaderAsync()
         {
             // Clear any existing Authorization headers
@@ -68,9 +61,6 @@ namespace WebApp.Services
             _logger.LogWarning("No authentication token found in session or cookie for Guide API request");
         }
 
-        /// <summary>
-        /// Get all available guides
-        /// </summary>
         public async Task<IEnumerable<GuideModel>> GetAllGuidesAsync()
         {
             try
@@ -106,9 +96,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get a specific guide by ID
-        /// </summary>
         public async Task<GuideModel?> GetGuideByIdAsync(int id)
         {
             try
@@ -148,9 +135,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Create a new guide
-        /// </summary>
         public async Task<GuideModel?> CreateGuideAsync(GuideModel guide)
         {
             try
@@ -195,9 +179,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Update an existing guide
-        /// </summary>
         public async Task<GuideModel?> UpdateGuideAsync(int id, GuideModel guide)
         {
             try
@@ -243,9 +224,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Delete a guide
-        /// </summary>
         public async Task<bool> DeleteGuideAsync(int id)
         {
             try
@@ -277,9 +255,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all guides assigned to a specific trip
-        /// </summary>
         public async Task<IEnumerable<GuideModel>> GetGuidesByTripAsync(int tripId)
         {
             try
@@ -312,9 +287,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Map from API model (single Name field) to WebApp model (FirstName/LastName)
-        /// </summary>
         private static GuideModel MapFromApiModel(ApiGuideModel apiGuide)
         {
             var nameParts = SplitName(apiGuide.Name ?? "");
@@ -332,9 +304,6 @@ namespace WebApp.Services
             };
         }
 
-        /// <summary>
-        /// Map from WebApp model (FirstName/LastName) to API model (single Name field)
-        /// </summary>
         private static ApiGuideModel MapToApiModel(GuideModel guide)
         {
             return new ApiGuideModel
@@ -349,10 +318,6 @@ namespace WebApp.Services
             };
         }
 
-        /// <summary>
-        /// Split a full name into first and last name components
-        /// Handles various name formats gracefully
-        /// </summary>
         private static (string firstName, string lastName) SplitName(string fullName)
         {
             if (string.IsNullOrWhiteSpace(fullName))
@@ -368,9 +333,6 @@ namespace WebApp.Services
             };
         }
 
-        /// <summary>
-        /// Deserialize API response handling $values wrapper
-        /// </summary>
         private static T? DeserializeApiResponse<T>(string jsonContent)
         {
             var options = new JsonSerializerOptions
@@ -406,9 +368,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// API model that matches the backend Guide entity structure
-        /// </summary>
         private class ApiGuideModel
         {
             public int Id { get; set; }

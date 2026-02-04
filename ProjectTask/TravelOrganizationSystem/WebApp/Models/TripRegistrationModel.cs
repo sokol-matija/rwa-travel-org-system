@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Models
 {
-    /// <summary>
-    /// Represents a trip registration/booking
-    /// </summary>
     public class TripRegistrationModel
     {
         public int Id { get; set; }

@@ -7,10 +7,6 @@ using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
-    /// <summary>
-    /// MVC Controller for managing guide assignments to trips (Admin only)
-    /// Provides interface to assign and remove guides from trips
-    /// </summary>
     [Authorize(Roles = "Admin")]
     public class AdminGuideAssignmentsController : Controller
     {
@@ -28,9 +24,6 @@ namespace WebApp.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Display guide assignments page
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -54,9 +47,6 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        /// <summary>
-        /// Handle guide assignment via AJAX POST
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Assign(int tripId, int guideId)
@@ -96,9 +86,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Handle guide removal via AJAX POST
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Remove(int tripId, int guideId)
@@ -138,9 +125,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Load trips and guides data for the page
-        /// </summary>
         private async Task LoadDataAsync(AdminGuideAssignmentsIndexViewModel vm)
         {
             vm.Trips = await _tripService.GetAllTripsAsync();

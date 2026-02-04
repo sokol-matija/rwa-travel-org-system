@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.ViewModels
 {
-    /// <summary>
-    /// ViewModel for password change form
-    /// </summary>
     public class ChangePasswordViewModel
     {
         [Required(ErrorMessage = "Current password is required")]

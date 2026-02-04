@@ -8,9 +8,6 @@ using WebApp.Models;
 
 namespace WebApp.Services
 {
-    /// <summary>
-    /// Service for trip-related operations using the API
-    /// </summary>
     public class TripService : ITripService
     {
         private readonly HttpClient _httpClient;
@@ -48,9 +45,6 @@ namespace WebApp.Services
             };
         }
 
-        /// <summary>
-        /// Set authentication token for API requests if user is logged in
-        /// </summary>
         private async Task SetAuthHeaderAsync()
         {
             // Clear any existing Authorization headers
@@ -85,9 +79,6 @@ namespace WebApp.Services
             _logger.LogWarning("No authentication token found in session or cookie");
         }
 
-        /// <summary>
-        /// Get all available trips
-        /// </summary>
         public async Task<List<TripModel>> GetAllTripsAsync()
         {
             try
@@ -232,9 +223,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get trips with pagination support
-        /// </summary>
         public async Task<(List<TripModel> trips, int totalCount)> GetTripsAsync(int page = 1, int pageSize = 10, int? destinationId = null)
         {
             try
@@ -274,9 +262,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Search trips with pagination support
-        /// </summary>
         public async Task<(List<TripModel> trips, int totalCount)> SearchTripsAsync(string? name, string? description, int page = 1, int pageSize = 10)
         {
             try
@@ -328,9 +313,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Helper method to parse trips from JSON response
-        /// </summary>
         private async Task<List<TripModel>> ParseTripsFromJsonAsync(string jsonContent)
         {
             var trips = new List<TripModel>();
@@ -414,9 +396,6 @@ namespace WebApp.Services
             return trips;
         }
 
-        /// <summary>
-        /// Get a specific trip by ID
-        /// </summary>
         public async Task<TripModel?> GetTripByIdAsync(int id)
         {
             try
@@ -513,9 +492,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all trips for a specific destination
-        /// </summary>
         public async Task<List<TripModel>> GetTripsByDestinationAsync(int destinationId)
         {
             try
@@ -657,9 +633,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Create a new trip (admin only)
-        /// </summary>
         public async Task<TripModel?> CreateTripAsync(TripModel trip)
         {
             try
@@ -732,9 +705,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Update an existing trip (admin only)
-        /// </summary>
         public async Task<TripModel?> UpdateTripAsync(int id, TripModel trip)
         {
             try
@@ -800,9 +770,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Delete a trip (admin only)
-        /// </summary>
         public async Task<bool> DeleteTripAsync(int id)
         {
             try
@@ -827,9 +794,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Assign a guide to a trip (admin only)
-        /// </summary>
         public async Task<bool> AssignGuideToTripAsync(int tripId, int guideId)
         {
             try
@@ -855,9 +819,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Remove a guide from a trip (admin only)
-        /// </summary>
         public async Task<bool> RemoveGuideFromTripAsync(int tripId, int guideId)
         {
             try
@@ -883,9 +844,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Book a trip for the current user
-        /// </summary>
         public async Task<bool> BookTripAsync(int tripId, int numberOfParticipants)
         {
             try
@@ -953,9 +911,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all trips booked by the current user
-        /// </summary>
         public async Task<List<TripRegistrationModel>> GetUserTripsAsync()
         {
             try
@@ -1057,9 +1012,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Enrich trips with destination images for those that don't have images
-        /// </summary>
         private async Task EnrichTripsWithDestinationImagesAsync(List<TripModel> trips)
         {
             if (trips == null || !trips.Any())
@@ -1120,9 +1072,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Cancel a trip booking for the current user
-        /// </summary>
         public async Task<bool> CancelBookingAsync(int bookingId)
         {
             try

@@ -6,9 +6,6 @@ namespace WebApp.ViewModels
 {
     #region AdminGuides ViewModels
 
-    /// <summary>
-    /// ViewModel for the Admin Guides Index page
-    /// </summary>
     public class AdminGuidesIndexViewModel
     {
         public IEnumerable<GuideModel> Guides { get; set; } = new List<GuideModel>();
@@ -16,9 +13,6 @@ namespace WebApp.ViewModels
         public string? SearchFilter { get; set; }
     }
 
-    /// <summary>
-    /// ViewModel for creating a new guide
-    /// </summary>
     public class AdminGuideCreateViewModel
     {
         [Required(ErrorMessage = "First name is required")]
@@ -53,9 +47,6 @@ namespace WebApp.ViewModels
         public string FullName => $"{FirstName} {LastName}".Trim();
     }
 
-    /// <summary>
-    /// ViewModel for editing an existing guide
-    /// </summary>
     public class AdminGuideEditViewModel
     {
         public int Id { get; set; }
@@ -92,9 +83,6 @@ namespace WebApp.ViewModels
         public string FullName => $"{FirstName} {LastName}".Trim();
     }
 
-    /// <summary>
-    /// ViewModel for viewing guide details
-    /// </summary>
     public class AdminGuideDetailsViewModel
     {
         public GuideModel Guide { get; set; } = default!;
@@ -106,9 +94,6 @@ namespace WebApp.ViewModels
 
     #region AdminGuideAssignments ViewModels
 
-    /// <summary>
-    /// ViewModel for the Admin Guide Assignments Index page
-    /// </summary>
     public class AdminGuideAssignmentsIndexViewModel
     {
         public List<TripModel> Trips { get; set; } = new List<TripModel>();
@@ -123,9 +108,6 @@ namespace WebApp.ViewModels
 
     #region AdminLogs ViewModels
 
-    /// <summary>
-    /// ViewModel for the Admin Logs Index page with pagination
-    /// </summary>
     public class AdminLogsIndexViewModel
     {
         private const int DefaultPageSize = 50;
@@ -144,9 +126,6 @@ namespace WebApp.ViewModels
         public int StartLogNumber => (Page - 1) * PageSize + 1;
         public int EndLogNumber => Math.Min(Page * PageSize, TotalCount);
 
-        /// <summary>
-        /// Generate pagination numbers for display
-        /// </summary>
         public List<int> GetPaginationNumbers()
         {
             var pageNumbers = new List<int>();
@@ -200,9 +179,6 @@ namespace WebApp.ViewModels
             return pageNumbers;
         }
 
-        /// <summary>
-        /// Generate URL for a specific page
-        /// </summary>
         public string GetPageUrl(int pageNumber)
         {
             return $"?page={pageNumber}&pageSize={PageSize}";

@@ -4,10 +4,6 @@ using WebApp.Services;
 
 namespace WebApp.Controllers
 {
-    /// <summary>
-    /// API Controller for handling AJAX requests from trip pages
-    /// Provides paginated trip data and filtering capabilities
-    /// </summary>
     [Route("api/trips")]
     [ApiController]
     public class TripsApiController : ControllerBase
@@ -26,14 +22,6 @@ namespace WebApp.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Get paginated trips with optional destination filtering
-        /// Used for AJAX pagination and filtering
-        /// </summary>
-        /// <param name="page">Page number (1-based)</param>
-        /// <param name="pageSize">Number of items per page</param>
-        /// <param name="destinationId">Optional destination ID for filtering</param>
-        /// <returns>Paginated trip data with metadata</returns>
         [HttpGet]
         public async Task<IActionResult> GetTrips(
             [FromQuery] int page = 1,
@@ -83,11 +71,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Get available destinations for filter dropdown
-        /// Used for AJAX requests when refreshing filters
-        /// </summary>
-        /// <returns>List of destinations</returns>
         [HttpGet("destinations")]
         public async Task<IActionResult> GetDestinations()
         {

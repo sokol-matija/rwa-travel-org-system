@@ -26,9 +26,6 @@ namespace WebApp.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Display all destinations with pagination
-        /// </summary>
         [AllowAnonymous]
         public async Task<IActionResult> Index(int page = 1)
         {
@@ -65,9 +62,6 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        /// <summary>
-        /// Display destination details
-        /// </summary>
         [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
@@ -104,9 +98,6 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        /// <summary>
-        /// Display create destination form (admin only)
-        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create()
@@ -114,9 +105,6 @@ namespace WebApp.Controllers
             return View(new CreateDestinationViewModel());
         }
 
-        /// <summary>
-        /// Handle create destination form submission (admin only)
-        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -162,9 +150,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Display edit destination form (admin only)
-        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
@@ -207,9 +192,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Handle edit destination form submission (admin only)
-        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -255,9 +237,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Handle delete destination (admin only)
-        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -278,9 +257,6 @@ namespace WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        /// <summary>
-        /// Handle update destination image (admin only)
-        /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]

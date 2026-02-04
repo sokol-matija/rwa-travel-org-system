@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Models
 {
-    /// <summary>
-    /// Represents a tour guide in the system
-    /// </summary>
     public class GuideModel
     {
         public int Id { get; set; }

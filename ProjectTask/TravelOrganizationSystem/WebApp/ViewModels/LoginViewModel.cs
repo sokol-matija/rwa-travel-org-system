@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.ViewModels
 {
-    /// <summary>
-    /// View model for the login form
-    /// </summary>
     public class LoginViewModel
     {
         [Required(ErrorMessage = "Username is required")]

@@ -8,9 +8,6 @@ using WebApp.Models;
 
 namespace WebApp.Services
 {
-    /// <summary>
-    /// Service for destination-related operations using the API
-    /// </summary>
     public class DestinationService : IDestinationService
     {
         private readonly HttpClient _httpClient;
@@ -46,9 +43,6 @@ namespace WebApp.Services
             };
         }
 
-        /// <summary>
-        /// Set authentication token for API requests if user is logged in
-        /// </summary>
         private async Task SetAuthHeaderAsync()
         {
             // Clear any existing Authorization headers
@@ -71,9 +65,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all destinations
-        /// </summary>
         public async Task<List<DestinationModel>> GetAllDestinationsAsync()
         {
             try
@@ -185,9 +176,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get a specific destination by ID
-        /// </summary>
         public async Task<DestinationModel?> GetDestinationByIdAsync(int id)
         {
             try
@@ -243,9 +231,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Returns a well-known tagline for a destination based on city and country
-        /// </summary>
         private string? GetDestinationTagline(DestinationModel destination)
         {
             // Match based on city name (case insensitive)
@@ -265,9 +250,6 @@ namespace WebApp.Services
             };
         }
 
-        /// <summary>
-        /// Create a new destination (admin only)
-        /// </summary>
         public async Task<DestinationModel?> CreateDestinationAsync(DestinationModel destination)
         {
             try
@@ -306,9 +288,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Update an existing destination (admin only)
-        /// </summary>
         public async Task<DestinationModel?> UpdateDestinationAsync(int id, DestinationModel destination)
         {
             try
@@ -337,9 +316,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Delete a destination (admin only)
-        /// </summary>
         public async Task<bool> DeleteDestinationAsync(int id)
         {
             try

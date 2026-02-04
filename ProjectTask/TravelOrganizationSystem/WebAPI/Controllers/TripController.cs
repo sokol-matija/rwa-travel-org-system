@@ -10,9 +10,6 @@ using WebAPI.Services;
 
 namespace WebAPI.Controllers
 {
-    /// <summary>
-    /// Controller for managing travel trips
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class TripController : ControllerBase
@@ -27,13 +24,6 @@ namespace WebAPI.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Get all available trips
-        /// </summary>
-        /// <remarks>
-        /// This endpoint is publicly accessible - no authentication required
-        /// </remarks>
-        /// <returns>List of all trips</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TripDTO>>> GetAllTrips()
         {
@@ -42,14 +32,6 @@ namespace WebAPI.Controllers
             return Ok(tripDtos);
         }
 
-        /// <summary>
-        /// Get a specific trip by ID
-        /// </summary>
-        /// <param name="id">The trip ID to retrieve</param>
-        /// <remarks>
-        /// This endpoint is publicly accessible - no authentication required
-        /// </remarks>
-        /// <returns>Trip details if found</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<TripDTO>> GetTrip(int id)
         {
@@ -60,14 +42,6 @@ namespace WebAPI.Controllers
             return Ok(MapTripToDto(trip));
         }
 
-        /// <summary>
-        /// Get all trips for a specific destination
-        /// </summary>
-        /// <param name="destinationId">The destination ID to filter trips by</param>
-        /// <remarks>
-        /// This endpoint is publicly accessible - no authentication required
-        /// </remarks>
-        /// <returns>List of trips for the specified destination</returns>
         [HttpGet("destination/{destinationId}")]
         public async Task<ActionResult<IEnumerable<TripDTO>>> GetTripsByDestination(int destinationId)
         {
@@ -76,19 +50,6 @@ namespace WebAPI.Controllers
             return Ok(tripDtos);
         }
 
-        /// <summary>
-        /// Search trips by name and/or description with pagination
-        /// </summary>
-        /// <param name="name">Optional name to search for</param>
-        /// <param name="description">Optional description to search for</param>
-        /// <param name="page">Page number (default: 1)</param>
-        /// <param name="count">Number of items per page (default: 10)</param>
-        /// <remarks>
-        /// This endpoint is publicly accessible - no authentication required
-        /// Supports searching by trip name and/or description.
-        /// Use pagination parameters to get results in manageable chunks.
-        /// </remarks>
-        /// <returns>Paginated list of trips matching search criteria</returns>
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<TripDTO>>> SearchTrips(
             [FromQuery] string? name,
@@ -108,14 +69,6 @@ namespace WebAPI.Controllers
             return Ok(tripDtos);
         }
 
-        /// <summary>
-        /// Create a new trip
-        /// </summary>
-        /// <param name="tripDto">The trip details to create</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>The newly created trip</returns>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TripDTO>> CreateTrip(CreateTripDTO tripDto)
@@ -140,15 +93,6 @@ namespace WebAPI.Controllers
             return CreatedAtAction(nameof(GetTrip), new { id = createdTrip.Id }, MapTripToDto(createdTrip));
         }
 
-        /// <summary>
-        /// Update an existing trip
-        /// </summary>
-        /// <param name="id">The ID of the trip to update</param>
-        /// <param name="tripDto">The updated trip details</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>The updated trip</returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TripDTO>> UpdateTrip(int id, UpdateTripDTO tripDto)
@@ -214,14 +158,6 @@ namespace WebAPI.Controllers
             };
         }
 
-        /// <summary>
-        /// Delete a trip
-        /// </summary>
-        /// <param name="id">The ID of the trip to delete</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>No content if deletion is successful</returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteTrip(int id)
@@ -233,15 +169,6 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Assign a guide to a trip
-        /// </summary>
-        /// <param name="tripId">ID of the trip</param>
-        /// <param name="guideId">ID of the guide to assign</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>No content if assignment is successful</returns>
         [HttpPost("{tripId}/guides/{guideId}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> AssignGuideToTrip(int tripId, int guideId)
@@ -253,15 +180,6 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Remove a guide from a trip
-        /// </summary>
-        /// <param name="tripId">ID of the trip</param>
-        /// <param name="guideId">ID of the guide to remove</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>No content if removal is successful</returns>
         [HttpDelete("{tripId}/guides/{guideId}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> RemoveGuideFromTrip(int tripId, int guideId)
@@ -273,9 +191,6 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Populate images for trips that don't have them using Unsplash API
-        /// </summary>
         [HttpPost("populate-images")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PopulateTripImages()
@@ -312,16 +227,6 @@ namespace WebAPI.Controllers
             }
         }
 
-        /// <summary>
-        /// Update trip image URL (public endpoint for image population)
-        /// </summary>
-        /// <param name="id">The ID of the trip to update</param>
-        /// <param name="request">The image URL to set</param>
-        /// <remarks>
-        /// This endpoint is public to allow image population scripts to work
-        /// Only updates the ImageUrl field for security
-        /// </remarks>
-        /// <returns>Success status</returns>
         [HttpPut("{id}/image")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTripImage(int id, [FromBody] UpdateImageRequest request)
@@ -346,16 +251,6 @@ namespace WebAPI.Controllers
             }
         }
 
-        /// <summary>
-        /// Update trip image URL (public endpoint for image population)
-        /// </summary>
-        /// <param name="id">The ID of the trip to update</param>
-        /// <param name="request">The image URL to set</param>
-        /// <remarks>
-        /// This endpoint is public to allow image population scripts to work
-        /// Only updates the ImageUrl field for security
-        /// </remarks>
-        /// <returns>Success status</returns>
         [HttpPut("{id}/image/public")]
         public async Task<IActionResult> UpdateTripImagePublic(int id, [FromBody] UpdateImageRequest request)
         {

@@ -9,9 +9,6 @@ using WebApp.ViewModels;
 
 namespace WebApp.Services
 {
-    /// <summary>
-    /// Service for handling authentication operations that connects to the backend API
-    /// </summary>
     public class AuthService : IAuthService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -27,9 +24,6 @@ namespace WebApp.Services
             _apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7066/api/";
         }
 
-        /// <summary>
-        /// Authenticates a user with the provided credentials via the API
-        /// </summary>
         public async Task<bool> LoginAsync(LoginViewModel loginModel)
         {
             try
@@ -116,9 +110,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Registers a new user via the API
-        /// </summary>
         public async Task<bool> RegisterAsync(RegisterViewModel registerModel)
         {
             try
@@ -163,9 +154,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Logs out the current user
-        /// </summary>
         public async Task LogoutAsync()
         {
             try
@@ -187,9 +175,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Gets the current authenticated user
-        /// </summary>
         public async Task<UserModel?> GetCurrentUserAsync()
         {
             try
@@ -255,25 +240,16 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Checks if the current user is authenticated
-        /// </summary>
         public bool IsAuthenticated()
         {
             return _httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
         }
 
-        /// <summary>
-        /// Checks if the current user is an admin
-        /// </summary>
         public bool IsAdmin()
         {
             return _httpContextAccessor.HttpContext?.User.IsInRole("Admin") ?? false;
         }
 
-        /// <summary>
-        /// Changes the password for the currently authenticated user
-        /// </summary>
         public async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword, string confirmPassword)
         {
             try

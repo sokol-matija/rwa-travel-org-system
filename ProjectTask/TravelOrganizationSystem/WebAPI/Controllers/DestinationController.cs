@@ -9,9 +9,6 @@ using WebAPI.Services;
 
 namespace WebAPI.Controllers
 {
-    /// <summary>
-    /// Controller for managing destinations
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class DestinationController : ControllerBase
@@ -23,13 +20,6 @@ namespace WebAPI.Controllers
             _destinationService = destinationService;
         }
 
-        /// <summary>
-        /// Get all destinations
-        /// </summary>
-        /// <remarks>
-        /// This endpoint is publicly accessible - no authentication required
-        /// </remarks>
-        /// <returns>List of all destinations</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DestinationDTO>>> GetAllDestinations()
         {
@@ -38,14 +28,6 @@ namespace WebAPI.Controllers
             return Ok(destinationDtos);
         }
 
-        /// <summary>
-        /// Get a specific destination by ID
-        /// </summary>
-        /// <param name="id">The destination ID to retrieve</param>
-        /// <remarks>
-        /// This endpoint is publicly accessible - no authentication required
-        /// </remarks>
-        /// <returns>Destination details if found</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<DestinationDTO>> GetDestination(int id)
         {
@@ -56,14 +38,6 @@ namespace WebAPI.Controllers
             return Ok(MapDestinationToDto(destination));
         }
 
-        /// <summary>
-        /// Create a new destination
-        /// </summary>
-        /// <param name="destinationDto">The destination details to create</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>The newly created destination</returns>
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DestinationDTO>> CreateDestination(CreateDestinationDTO destinationDto)
@@ -86,15 +60,6 @@ namespace WebAPI.Controllers
                 MapDestinationToDto(createdDestination));
         }
 
-        /// <summary>
-        /// Update an existing destination
-        /// </summary>
-        /// <param name="id">The ID of the destination to update</param>
-        /// <param name="destinationDto">The updated destination details</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>The updated destination</returns>
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DestinationDTO>> UpdateDestination(int id, UpdateDestinationDTO destinationDto)
@@ -123,14 +88,6 @@ namespace WebAPI.Controllers
             return Ok(MapDestinationToDto(updatedDestination));
         }
 
-        /// <summary>
-        /// Delete a destination
-        /// </summary>
-        /// <param name="id">The ID of the destination to delete</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>No content if deletion is successful</returns>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteDestination(int id)
@@ -142,15 +99,6 @@ namespace WebAPI.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Update a destination's image URL
-        /// </summary>
-        /// <param name="id">The ID of the destination to update</param>
-        /// <param name="model">The model containing the new image URL</param>
-        /// <remarks>
-        /// This endpoint requires Admin role access
-        /// </remarks>
-        /// <returns>No content if update is successful</returns>
         [HttpPut("{id}/image")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult> UpdateDestinationImage(int id, [FromBody] UpdateDestinationImageDTO model)

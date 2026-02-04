@@ -6,10 +6,6 @@ using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
-    /// <summary>
-    /// MVC Controller for viewing system logs (Admin only)
-    /// Provides paginated view of system logs for monitoring and troubleshooting
-    /// </summary>
     [Authorize(Roles = "Admin")]
     public class AdminLogsController : Controller
     {
@@ -27,9 +23,6 @@ namespace WebApp.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Display logs page with pagination
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Index(int page = 1, int pageSize = DefaultPageSize)
         {

@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Models
 {
-    /// <summary>
-    /// Represents a user in the system
-    /// </summary>
     public class UserModel
     {
         public int Id { get; set; }

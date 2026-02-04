@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI.Models
 {
-    /// <summary>
-    /// DTO for image URL update requests
-    /// </summary>
     public class ImageUrlUpdateRequest
     {
         [Required]

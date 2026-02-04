@@ -6,10 +6,6 @@ using WebApp.Models;
 
 namespace WebApp.Services
 {
-    /// <summary>
-    /// Service for managing system logs by communicating with the WebAPI
-    /// Handles authentication and data conversion for admin log viewing
-    /// </summary>
     public class LogService : ILogService
     {
         private readonly HttpClient _httpClient;
@@ -42,9 +38,6 @@ namespace WebApp.Services
                 _apiBaseUrl += "/";
         }
 
-        /// <summary>
-        /// Set authentication token for API requests if user is logged in
-        /// </summary>
         private async Task SetAuthHeaderAsync()
         {
             // Clear any existing Authorization headers
@@ -79,9 +72,6 @@ namespace WebApp.Services
             _logger.LogWarning("No authentication token found for logs API request");
         }
 
-        /// <summary>
-        /// Get the most recent log entries up to the specified count
-        /// </summary>
         public async Task<List<LogModel>> GetLogsAsync(int count)
         {
             try
@@ -117,9 +107,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get the total count of log entries in the system
-        /// </summary>
         public async Task<int> GetLogsCountAsync()
         {
             try
@@ -156,9 +143,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get logs with pagination support
-        /// </summary>
         public async Task<(List<LogModel> logs, int totalCount)> GetLogsAsync(int page = 1, int pageSize = 50)
         {
             try
@@ -198,9 +182,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Helper method to parse logs from JSON response
-        /// </summary>
         private Task<List<LogModel>> ParseLogsFromJsonAsync(string jsonContent)
         {
             var logs = new List<LogModel>();
@@ -258,9 +239,6 @@ namespace WebApp.Services
             return Task.FromResult(logs);
         }
 
-        /// <summary>
-        /// Helper method to get string property from JSON element
-        /// </summary>
         private string? GetStringProperty(JsonElement element, string propertyName)
         {
             return element.TryGetProperty(propertyName, out var property) && property.ValueKind != JsonValueKind.Null
@@ -268,9 +246,6 @@ namespace WebApp.Services
                 : null;
         }
 
-        /// <summary>
-        /// Helper method to get int property from JSON element
-        /// </summary>
         private int GetIntProperty(JsonElement element, string propertyName, int defaultValue = 0)
         {
             if (element.TryGetProperty(propertyName, out var property))
@@ -281,9 +256,6 @@ namespace WebApp.Services
             return defaultValue;
         }
 
-        /// <summary>
-        /// Helper method to get DateTime property from JSON element
-        /// </summary>
         private DateTime GetDateTimeProperty(JsonElement element, string propertyName, DateTime? defaultValue = null)
         {
             if (element.TryGetProperty(propertyName, out var property))

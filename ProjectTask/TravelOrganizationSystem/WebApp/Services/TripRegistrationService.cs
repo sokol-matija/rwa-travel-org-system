@@ -7,9 +7,6 @@ using WebApp.Models;
 
 namespace WebApp.Services
 {
-    /// <summary>
-    /// Service for trip registration (booking) operations using the API
-    /// </summary>
     public class TripRegistrationService : ITripRegistrationService
     {
         private readonly HttpClient _httpClient;
@@ -40,9 +37,6 @@ namespace WebApp.Services
             };
         }
 
-        /// <summary>
-        /// Set authentication token for API requests if user is logged in
-        /// </summary>
         private async Task SetAuthHeaderAsync()
         {
             // Clear any existing Authorization headers
@@ -65,9 +59,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all registrations (admin only)
-        /// </summary>
         public async Task<List<TripRegistrationModel>> GetAllRegistrationsAsync()
         {
             try
@@ -94,9 +85,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get a specific registration by ID
-        /// </summary>
         public async Task<TripRegistrationModel?> GetRegistrationByIdAsync(int id)
         {
             try
@@ -122,9 +110,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all registrations for a specific user
-        /// </summary>
         public async Task<List<TripRegistrationModel>> GetRegistrationsByUserAsync(int userId)
         {
             try
@@ -151,9 +136,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all registrations for a specific trip (admin only)
-        /// </summary>
         public async Task<List<TripRegistrationModel>> GetRegistrationsByTripAsync(int tripId)
         {
             try
@@ -180,9 +162,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Create a new registration (book a trip)
-        /// </summary>
         public async Task<TripRegistrationModel?> CreateRegistrationAsync(TripRegistrationModel registration)
         {
             try
@@ -211,9 +190,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Update an existing registration
-        /// </summary>
         public async Task<TripRegistrationModel?> UpdateRegistrationAsync(int id, TripRegistrationModel registration)
         {
             try
@@ -242,9 +218,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Delete a registration (cancel a booking)
-        /// </summary>
         public async Task<bool> DeleteRegistrationAsync(int id)
         {
             try
@@ -269,9 +242,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Update the status of a registration (admin only)
-        /// </summary>
         public async Task<bool> UpdateRegistrationStatusAsync(int id, string status)
         {
             try
@@ -298,9 +268,6 @@ namespace WebApp.Services
             }
         }
 
-        /// <summary>
-        /// Get all trips booked by the current user
-        /// </summary>
         public async Task<List<TripRegistrationModel>> GetUserTripsAsync()
         {
             try

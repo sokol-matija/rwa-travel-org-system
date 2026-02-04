@@ -23,11 +23,6 @@ namespace WebApp.Controllers
             _configuration = configuration;
         }
 
-        /// <summary>
-        /// Get a random image from Unsplash based on a search query
-        /// </summary>
-        /// <param name="query">The search term to use for finding a relevant image</param>
-        /// <returns>A random image URL and related metadata</returns>
         [HttpGet("random")]
         public async Task<IActionResult> GetRandomImage([FromQuery] string query)
         {
@@ -60,9 +55,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Populate images for all trips that don't have them - simplified version
-        /// </summary>
         [HttpPost("populate-trip-images")]
         public async Task<IActionResult> PopulateTripImages()
         {
@@ -215,9 +207,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Simple test to populate images for first 2 trips only - for debugging
-        /// </summary>
         [HttpPost("populate-test")]
         public async Task<IActionResult> PopulateTripImagesTest()
         {
@@ -343,9 +332,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Force refresh all trip images - clears existing and populates with unique images
-        /// </summary>
         [HttpPost("force-refresh-images")]
         public async Task<IActionResult> ForceRefreshTripImages()
         {
@@ -490,9 +476,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Detect and fix broken trip images with reliable fallback images
-        /// </summary>
         [HttpPost("fix-broken-images")]
         public async Task<IActionResult> FixBrokenImages()
         {

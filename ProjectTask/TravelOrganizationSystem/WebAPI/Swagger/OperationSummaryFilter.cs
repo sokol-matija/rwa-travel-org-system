@@ -5,16 +5,8 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WebAPI.Swagger
 {
-    /// <summary>
-    /// Operation filter to add authentication information to the operation summary
-    /// </summary>
     public class OperationSummaryFilter : IOperationFilter
     {
-        /// <summary>
-        /// Applies the filter to the specified operation using the given context.
-        /// </summary>
-        /// <param name="operation">The operation to apply the filter to.</param>
-        /// <param name="context">The current operation filter context.</param>
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             // Get authentication requirements

@@ -6,10 +6,6 @@ using WebApp.ViewModels;
 
 namespace WebApp.Controllers
 {
-    /// <summary>
-    /// MVC Controller for managing travel guides (Admin only)
-    /// Provides CRUD operations and AJAX functionality
-    /// </summary>
     [Authorize(Roles = "Admin")]
     public class AdminGuidesController : Controller
     {
@@ -27,9 +23,6 @@ namespace WebApp.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Display guides list with optional search filtering
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Index(string? searchFilter)
         {
@@ -73,9 +66,6 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        /// <summary>
-        /// AJAX handler for searching guides
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Search(string searchTerm = "")
         {
@@ -126,18 +116,12 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Display create guide form
-        /// </summary>
         [HttpGet]
         public IActionResult Create()
         {
             return View(new AdminGuideCreateViewModel());
         }
 
-        /// <summary>
-        /// Handle guide creation (form POST)
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AdminGuideCreateViewModel vm)
@@ -182,9 +166,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// AJAX handler for validating guide form
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Validate([FromBody] AdminGuideCreateViewModel guide)
         {
@@ -222,9 +203,6 @@ namespace WebApp.Controllers
             return Json(new { isValid = errors.Count == 0, errors });
         }
 
-        /// <summary>
-        /// AJAX handler for creating guide
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateAjax([FromBody] AdminGuideCreateViewModel guide)
         {
@@ -310,9 +288,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Display edit guide form
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -341,9 +316,6 @@ namespace WebApp.Controllers
             return View(vm);
         }
 
-        /// <summary>
-        /// Handle guide update (form POST)
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(AdminGuideEditViewModel vm)
@@ -389,9 +361,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// AJAX handler for validating edit form
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> ValidateEdit([FromBody] AdminGuideEditViewModel guide)
         {
@@ -430,9 +399,6 @@ namespace WebApp.Controllers
             return Json(new { isValid = errors.Count == 0, errors });
         }
 
-        /// <summary>
-        /// AJAX handler for updating guide
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> UpdateAjax([FromBody] AdminGuideEditViewModel guide)
         {
@@ -520,9 +486,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Display guide details
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -554,9 +517,6 @@ namespace WebApp.Controllers
             }
         }
 
-        /// <summary>
-        /// Handle guide deletion via AJAX POST
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

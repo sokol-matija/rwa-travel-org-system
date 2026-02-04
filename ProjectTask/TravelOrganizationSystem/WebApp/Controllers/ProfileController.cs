@@ -6,9 +6,6 @@ using WebApp.Models;
 
 namespace WebApp.Controllers
 {
-    /// <summary>
-    /// Controller for handling profile operations via AJAX
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -27,9 +24,6 @@ namespace WebApp.Controllers
             _apiBaseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7066/api/";
         }
 
-        /// <summary>
-        /// Update user profile information
-        /// </summary>
         [HttpPut]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
@@ -102,9 +96,6 @@ namespace WebApp.Controllers
         }
     }
 
-    /// <summary>
-    /// Request model for profile updates
-    /// </summary>
     public class UpdateProfileRequest
     {
         public string Email { get; set; } = string.Empty;

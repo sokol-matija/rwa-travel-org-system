@@ -3,9 +3,6 @@ using WebApp.Models;
 
 namespace WebApp.ViewModels
 {
-    /// <summary>
-    /// ViewModel for the Destinations Index page
-    /// </summary>
     public class DestinationIndexViewModel
     {
         public List<DestinationModel> Destinations { get; set; } = new List<DestinationModel>();
@@ -18,9 +15,6 @@ namespace WebApp.ViewModels
         public string? ErrorMessage { get; set; }
     }
 
-    /// <summary>
-    /// ViewModel for the Destination Details page
-    /// </summary>
     public class DestinationDetailsViewModel
     {
         public DestinationModel Destination { get; set; } = default!;
@@ -29,9 +23,6 @@ namespace WebApp.ViewModels
         public string? ErrorMessage { get; set; }
     }
 
-    /// <summary>
-    /// ViewModel for creating a new destination
-    /// </summary>
     public class CreateDestinationViewModel
     {
         [Required(ErrorMessage = "Name is required")]
@@ -63,9 +54,6 @@ namespace WebApp.ViewModels
         public string? BestTimeToVisit { get; set; }
     }
 
-    /// <summary>
-    /// ViewModel for editing an existing destination
-    /// </summary>
     public class EditDestinationViewModel
     {
         public int Id { get; set; }

@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Models
 {
-    /// <summary>
-    /// Represents a travel destination in the system
-    /// </summary>
     public class DestinationModel
     {
         public int Id { get; set; }
@@ -34,9 +31,6 @@ namespace WebApp.Models
         [StringLength(200, ErrorMessage = "Best time to visit description cannot exceed 200 characters")]
         public string? BestTimeToVisit { get; set; }
 
-        /// <summary>
-        /// Nickname or famous tagline for the destination (e.g., "The City of Light" for Paris)
-        /// </summary>
         [Display(Name = "Tagline")]
         [StringLength(200, ErrorMessage = "Tagline cannot exceed 200 characters")]
         public string? Tagline { get; set; }
@@ -48,9 +42,6 @@ namespace WebApp.Models
         public string Location => $"{City}, {Country}";
     }
 
-    /// <summary>
-    /// Model for creating a new destination
-    /// </summary>
     public class CreateDestinationModel
     {
         [Required(ErrorMessage = "Name is required")]
